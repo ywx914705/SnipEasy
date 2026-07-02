@@ -6,6 +6,8 @@
 *.user
 *.suo
 *.sln.docstates
+*.deps.json
+*.runtimeconfig.json
 
 ## VS / IDE
 .vs/
@@ -59,3 +61,4 @@ Desktop.ini
 ## Temporary files
 *.tmp
 *.bak
+unins000.*
