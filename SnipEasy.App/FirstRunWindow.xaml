@@ -1,0 +1,110 @@
+<Window x:Class="SnipEasy.App.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="欢迎使用 SnipEasy"
+        Width="680"
+        Height="580"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        Background="#F6FAFF">
+    <Border Margin="24" Background="#FFFFFF" BorderBrush="#D8E1EA" BorderThickness="1" CornerRadius="12" Padding="26">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="SnipEasy 已准备好" FontSize="24" FontWeight="SemiBold" Foreground="#101828" />
+                <TextBlock Text="截图、批注、贴图、录屏，一次完成。" FontSize="13" Foreground="#667085" Margin="0,8,0,0" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0,20,0,16" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- F1 截图 -->
+                    <Border Background="#F0F6FF" BorderBrush="#CFE1F5" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Background="#2563EB" CornerRadius="8" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="F1" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="区域截图与批注" FontSize="16" FontWeight="SemiBold" Foreground="#1D4ED8" />
+                                <TextBlock Text="框选区域后直接批注（画笔、矩形、椭圆、文字、箭头、马赛克），然后复制、贴图或保存。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- F2 录屏 -->
+                    <Border Background="#ECFDF5" BorderBrush="#BBF7D0" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Background="#047857" CornerRadius="8" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="F2" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="屏幕录制" FontSize="16" FontWeight="SemiBold" Foreground="#047857" />
+                                <TextBlock Text="按 F2 开始录屏，再按 F2 停止；停止后选择保存或取消。支持录制电脑声音和麦克风。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- F3 贴图 -->
+                    <Border Background="#FDF4FF" BorderBrush="#E9D5FF" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Background="#9333EA" CornerRadius="8" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="F3" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="贴图到屏幕" FontSize="16" FontWeight="SemiBold" Foreground="#7C3AED" />
+                                <TextBlock Text="截图后点击贴图，或按 F3 从剪贴板贴图。贴图置顶显示，可拖拽移动，双击关闭。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- F4 取色 -->
+                    <Border Background="#FFF7ED" BorderBrush="#FED7AA" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Background="#EA580C" CornerRadius="8" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="F4" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="屏幕取色器" FontSize="16" FontWeight="SemiBold" Foreground="#C2410C" />
+                                <TextBlock Text="按 F4 启动取色器，移动鼠标实时预览颜色，点击复制 HEX/RGB/HSL 到剪贴板。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- 自定义热键 -->
+                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="自定义快捷键" FontSize="14" FontWeight="SemiBold" Foreground="#475467" />
+                            <TextBlock Text="在主窗口设置面板中可以自定义所有快捷键，支持 F1-F12 和组合键。" Foreground="#667085" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="稍后再说" MinWidth="96" Padding="14,8" Margin="0,0,10,0" Click="Close_Click" />
+                <Button Content="开始使用" MinWidth="108" Padding="14,8" Background="#2563EB" BorderBrush="#1D4ED8" Foreground="#FFFFFF" Click="Close_Click" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

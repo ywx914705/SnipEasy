@@ -1,0 +1,426 @@
+<Window x:Class="SnipEasy.App.RegionCaptureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="区域截图"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="#000000"
+        Cursor="Cross"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        KeyDown="Window_KeyDown">
+    <Window.Resources>
+        <DropShadowEffect x:Key="PanelShadow"
+                          BlurRadius="24"
+                          ShadowDepth="8"
+                          Direction="270"
+                          Opacity="0.24"
+                          Color="#111111" />
+
+        <Style x:Key="FloatingPanel" TargetType="Border">
+            <Setter Property="Background" Value="#FCFFFFFF" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Effect" Value="{StaticResource PanelShadow}" />
+        </Style>
+
+        <Style x:Key="ToolButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="MinWidth" Value="70" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Margin" Value="3,3,3,3" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#2563EB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="3,3,3,3" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#2563EB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#2563EB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SelectionThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Width" Value="12" />
+            <Setter Property="Height" Value="12" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border Background="#FFFFFF"
+                                BorderBrush="#2563EB"
+                                BorderThickness="2"
+                                CornerRadius="6" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RegionResizeThumbStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Panel.ZIndex" Value="30" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Grid>
+                            <Border Background="#FFFFFF"
+                                    BorderBrush="#0EA5E9"
+                                    BorderThickness="2"
+                                    CornerRadius="9" />
+                            <Border Width="6"
+                                    Height="6"
+                                    Background="#0F766E"
+                                    CornerRadius="3"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Image x:Name="DesktopImage" Stretch="Fill" />
+
+        <Canvas x:Name="OverlayCanvas"
+                Background="Transparent"
+                SizeChanged="OverlayCanvas_SizeChanged"
+                MouseLeftButtonDown="OverlayCanvas_MouseLeftButtonDown"
+                MouseMove="OverlayCanvas_MouseMove"
+                MouseLeftButtonUp="OverlayCanvas_MouseLeftButtonUp">
+            <Rectangle x:Name="TopShade" Fill="#78000000" />
+            <Rectangle x:Name="LeftShade" Fill="#78000000" />
+            <Rectangle x:Name="RightShade" Fill="#78000000" />
+            <Rectangle x:Name="BottomShade" Fill="#78000000" />
+
+            <Border x:Name="CaptureEditor"
+                    Visibility="Collapsed"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Background="#FFFFFF"
+                    ClipToBounds="True">
+                <Grid x:Name="CaptureSurface" ClipToBounds="True" Background="#FFFFFF">
+                    <Image x:Name="SelectedImage" Stretch="Fill" SnapsToDevicePixels="True" />
+                    <InkCanvas x:Name="AnnotationCanvas"
+                               Background="Transparent"
+                               ClipToBounds="True"
+                               EditingMode="Ink"
+                               StrokeCollected="AnnotationCanvas_StrokeCollected"
+                               MouseLeftButtonDown="AnnotationCanvas_MouseLeftButtonDown"
+                               MouseMove="AnnotationCanvas_MouseMove"
+                               MouseLeftButtonUp="AnnotationCanvas_MouseLeftButtonUp" />
+                    <Canvas x:Name="SelectionOverlay"
+                            Panel.ZIndex="20"
+                            Background="{x:Null}"
+                            IsHitTestVisible="True">
+                        <Rectangle x:Name="ElementSelectionFrame"
+                                   Stroke="#2563EB"
+                                   StrokeThickness="2"
+                                   StrokeDashArray="5,3"
+                                   Fill="{x:Null}"
+                                   Cursor="SizeAll"
+                                   Visibility="Collapsed"
+                                   MouseLeftButtonDown="SelectionFrame_MouseLeftButtonDown"
+                                   MouseMove="SelectionFrame_MouseMove"
+                                   MouseLeftButtonUp="SelectionFrame_MouseLeftButtonUp" />
+                        <Thumb x:Name="ResizeTopLeftHandle"
+                               Style="{StaticResource SelectionThumbStyle}"
+                               Tag="TopLeft"
+                               Cursor="SizeNWSE"
+                               DragStarted="ResizeHandle_DragStarted"
+                               DragDelta="ResizeHandle_DragDelta"
+                               DragCompleted="ResizeHandle_DragCompleted" />
+                        <Thumb x:Name="ResizeTopRightHandle"
+                               Style="{StaticResource SelectionThumbStyle}"
+                               Tag="TopRight"
+                               Cursor="SizeNESW"
+                               DragStarted="ResizeHandle_DragStarted"
+                               DragDelta="ResizeHandle_DragDelta"
+                               DragCompleted="ResizeHandle_DragCompleted" />
+                        <Thumb x:Name="ResizeBottomLeftHandle"
+                               Style="{StaticResource SelectionThumbStyle}"
+                               Tag="BottomLeft"
+                               Cursor="SizeNESW"
+                               DragStarted="ResizeHandle_DragStarted"
+                               DragDelta="ResizeHandle_DragDelta"
+                               DragCompleted="ResizeHandle_DragCompleted" />
+                        <Thumb x:Name="ResizeBottomRightHandle"
+                               Style="{StaticResource SelectionThumbStyle}"
+                               Tag="BottomRight"
+                               Cursor="SizeNWSE"
+                               DragStarted="ResizeHandle_DragStarted"
+                               DragDelta="ResizeHandle_DragDelta"
+                               DragCompleted="ResizeHandle_DragCompleted" />
+                    </Canvas>
+                    <Border x:Name="WatermarkBadge"
+                            Panel.ZIndex="8"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Margin="18"
+                            Background="#B0000000"
+                            CornerRadius="7"
+                            Padding="12,7"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="WatermarkPreviewText"
+                                   Foreground="#FFFFFF"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Rectangle x:Name="SelectionOutline"
+                       Panel.ZIndex="18"
+                       Stroke="#0EA5E9"
+                       StrokeThickness="2"
+                       Fill="{x:Null}"
+                       IsHitTestVisible="False"
+                       Visibility="Collapsed" />
+
+            <Thumb x:Name="SelectionTopLeftHandle"
+                   Style="{StaticResource RegionResizeThumbStyle}"
+                   Tag="TopLeft"
+                   Cursor="SizeNWSE"
+                   ToolTip="拖动调整截图区域"
+                   DragStarted="SelectionResizeHandle_DragStarted"
+                   DragDelta="SelectionResizeHandle_DragDelta"
+                   DragCompleted="SelectionResizeHandle_DragCompleted" />
+            <Thumb x:Name="SelectionTopRightHandle"
+                   Style="{StaticResource RegionResizeThumbStyle}"
+                   Tag="TopRight"
+                   Cursor="SizeNESW"
+                   ToolTip="拖动调整截图区域"
+                   DragStarted="SelectionResizeHandle_DragStarted"
+                   DragDelta="SelectionResizeHandle_DragDelta"
+                   DragCompleted="SelectionResizeHandle_DragCompleted" />
+            <Thumb x:Name="SelectionBottomLeftHandle"
+                   Style="{StaticResource RegionResizeThumbStyle}"
+                   Tag="BottomLeft"
+                   Cursor="SizeNESW"
+                   ToolTip="拖动调整截图区域"
+                   DragStarted="SelectionResizeHandle_DragStarted"
+                   DragDelta="SelectionResizeHandle_DragDelta"
+                   DragCompleted="SelectionResizeHandle_DragCompleted" />
+            <Thumb x:Name="SelectionBottomRightHandle"
+                   Style="{StaticResource RegionResizeThumbStyle}"
+                   Tag="BottomRight"
+                   Cursor="SizeNWSE"
+                   ToolTip="拖动调整截图区域"
+                   DragStarted="SelectionResizeHandle_DragStarted"
+                   DragDelta="SelectionResizeHandle_DragDelta"
+                   DragCompleted="SelectionResizeHandle_DragCompleted" />
+
+            <!-- 工具栏：选区下方居中 -->
+            <Border x:Name="ToolBar"
+                    Background="#F8FAFC"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="4,2"
+                    Visibility="Collapsed">
+                <StackPanel x:Name="ToolButtonsPanel" Orientation="Horizontal">
+                    <Button x:Name="SelectToolButton" Style="{StaticResource ToolButton}" Click="SelectTool_Click" ToolTip="选择">
+                        <TextBlock x:Name="SelectToolText" Text="选择" FontSize="12" />
+                    </Button>
+                    <Button x:Name="PenToolButton" Style="{StaticResource ToolButton}" Click="PenTool_Click" ToolTip="画笔">
+                        <TextBlock x:Name="PenToolText" Text="画笔" FontSize="12" />
+                    </Button>
+                    <Button x:Name="RectangleToolButton" Style="{StaticResource ToolButton}" Click="RectangleTool_Click" ToolTip="矩形">
+                        <TextBlock x:Name="RectangleToolText" Text="矩形" FontSize="12" />
+                    </Button>
+                    <Button x:Name="EllipseToolButton" Style="{StaticResource ToolButton}" Click="EllipseTool_Click" ToolTip="椭圆">
+                        <TextBlock x:Name="EllipseToolText" Text="椭圆" FontSize="12" />
+                    </Button>
+                    <Button x:Name="TextToolButton" Style="{StaticResource ToolButton}" Click="TextTool_Click" ToolTip="文字">
+                        <TextBlock x:Name="TextToolText" Text="文字" FontSize="12" />
+                    </Button>
+                    <Button x:Name="ArrowToolButton" Style="{StaticResource ToolButton}" Click="ArrowTool_Click" ToolTip="箭头">
+                        <TextBlock x:Name="ArrowToolText" Text="箭头" FontSize="12" />
+                    </Button>
+                    <Button x:Name="MosaicToolButton" Style="{StaticResource ToolButton}" Click="MosaicTool_Click" ToolTip="马赛克">
+                        <TextBlock x:Name="MosaicToolText" Text="马赛克" FontSize="12" />
+                    </Button>
+
+                    <Border x:Name="Sep1" Width="1" Height="16" Background="#E2E8F0" Margin="4,0" />
+
+                    <Button x:Name="RedColorButton" Style="{StaticResource IconButton}" Click="RedColor_Click" ToolTip="红色">
+                        <Border Width="12" Height="12" Background="#EF4444" CornerRadius="6" />
+                    </Button>
+                    <Button x:Name="BlueColorButton" Style="{StaticResource IconButton}" Click="BlueColor_Click" ToolTip="蓝色">
+                        <Border Width="12" Height="12" Background="#2563EB" CornerRadius="6" />
+                    </Button>
+                    <Button x:Name="AmberColorButton" Style="{StaticResource IconButton}" Click="AmberColor_Click" ToolTip="橙色">
+                        <Border Width="12" Height="12" Background="#F59E0B" CornerRadius="6" />
+                    </Button>
+                    <Button x:Name="GreenColorButton" Style="{StaticResource IconButton}" Click="GreenColor_Click" ToolTip="绿色">
+                        <Border Width="12" Height="12" Background="#10B981" CornerRadius="6" />
+                    </Button>
+                    <Button x:Name="BlackColorButton" Style="{StaticResource IconButton}" Click="BlackColor_Click" ToolTip="黑色">
+                        <Border Width="12" Height="12" Background="#111827" CornerRadius="6" />
+                    </Button>
+
+                    <Border x:Name="Sep2" Width="1" Height="16" Background="#E2E8F0" Margin="4,0" />
+
+                    <Slider x:Name="StrokeThicknessSlider"
+                            Width="60"
+                            Minimum="2"
+                            Maximum="14"
+                            Value="4"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            VerticalAlignment="Center"
+                            Margin="0"
+                            ValueChanged="StrokeThicknessSlider_ValueChanged" />
+                </StackPanel>
+            </Border>
+
+            <!-- 操作按钮：选区右下角 -->
+            <StackPanel x:Name="ActionBar"
+                        Orientation="Horizontal"
+                        Visibility="Collapsed">
+                <!-- 次操作：左侧 -->
+                <Button x:Name="UndoButton" Style="{StaticResource ActionButton}" Content="撤销" Click="Undo_Click" ToolTip="Ctrl+Z"
+                        Width="50" Height="26" Margin="2" />
+                <Button x:Name="DeleteButton" Style="{StaticResource ActionButton}" Content="删除" Click="Delete_Click" ToolTip="Delete键删除选中元素"
+                        Width="50" Height="26" Margin="2" />
+                <Button x:Name="ClearButton" Style="{StaticResource ActionButton}" Content="清空" Click="Clear_Click" ToolTip="清空所有批注"
+                        Width="50" Height="26" Margin="2" />
+                <Button x:Name="StickerButton" Style="{StaticResource ActionButton}" Content="贴图" Click="Sticker_Click" ToolTip="贴到屏幕"
+                        Width="50" Height="26" Margin="2" />
+                <!-- 分隔线 -->
+                <Border Width="1" Height="18" Background="#CBD5E1" Margin="6,0" VerticalAlignment="Center" />
+                <!-- 主操作：右侧，最常用 -->
+                <Button x:Name="CopyButton" Style="{StaticResource ActionButton}" Content="复制" Click="Copy_Click" ToolTip="Ctrl+Enter复制"
+                        Width="50" Height="26" Margin="2"
+                        Background="#2563EB" Foreground="White" />
+                <Button x:Name="SaveButton" Style="{StaticResource ActionButton}" Content="保存" Click="Save_Click" ToolTip="保存图片"
+                        Width="50" Height="26" Margin="2" />
+                <Button x:Name="CancelButton" Style="{StaticResource ActionButton}" Content="取消" Click="Cancel_Click" ToolTip="Esc取消"
+                        Width="50" Height="26" Margin="2" />
+            </StackPanel>
+
+            <Border x:Name="HintBar"
+                    Background="#EFFFFFFF"
+                    BorderBrush="#D7E0EA"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="14,9"
+                    Effect="{StaticResource PanelShadow}">
+                <StackPanel>
+                    <TextBlock Foreground="#1F2937"
+                               FontSize="13"
+                               Text="拖拽选择截图区域；框选后可批注、复制或保存" />
+                    <TextBlock Foreground="#6B7280"
+                               FontSize="11"
+                               Margin="0,4,0,0"
+                               Text="快捷键：Ctrl+Z 撤销 | Delete 删除选中 | Ctrl+Enter 复制 | Esc 取消 | 方向键微调位置" />
+                </StackPanel>
+            </Border>
+        </Canvas>
+    </Grid>
+</Window>

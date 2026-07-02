@@ -1,0 +1,39 @@
+<UserControl x:Class="SnipEasy.App.Controls.HotkeyRecorderControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="30" d:DesignWidth="200">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="HotkeyBorder"
+                Grid.Column="0"
+                Background="White"
+                BorderBrush="#CBD5E1"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="8,4"
+                Cursor="Hand"
+                MouseLeftButtonDown="HotkeyBorder_MouseLeftButtonDown">
+            <TextBlock x:Name="HotkeyText"
+                       Text="点击录制热键"
+                       Foreground="#94A3B8"
+                       VerticalAlignment="Center" />
+        </Border>
+
+        <Button x:Name="ClearButton"
+                Grid.Column="1"
+                Content="×"
+                Width="24"
+                Height="24"
+                Margin="4,0,0,0"
+                Click="ClearButton_Click"
+                Visibility="Collapsed"
+                ToolTip="清除热键" />
+    </Grid>
+</UserControl>

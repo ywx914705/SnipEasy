@@ -1,0 +1,61 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.sln.docstates
+
+## VS / IDE
+.vs/
+*.rsuser
+*.sln.ide/
+.idea/
+*.swp
+
+## NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+## .NET
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.log
+*.lib
+*.exp
+*.obj
+
+## Runtime data
+Data/settings.json
+Data/history.json
+Data/snipeasy.log
+Data/stickers/
+Data/RecordingDrafts/
+Data/CrashReports/
+
+## Screenshots & Videos (user-generated)
+Screenshots/
+Videos/
+
+## Build artifacts
+dist/
+website/downloads/
+
+## FFmpeg (large binary, download separately)
+tools/
+ffmpeg-8.1.1-essentials_build/
+
+## OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Temporary files
+*.tmp
+*.bak

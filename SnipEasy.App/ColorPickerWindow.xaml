@@ -1,0 +1,196 @@
+<Window x:Class="SnipEasy.App.ColorPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SnipEasy 取色器"
+        Width="320"
+        Height="480"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        KeyDown="Window_KeyDown">
+    <Window.Resources>
+        <Style x:Key="CopyButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#2563EB" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#DBEAFE" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#F8FAFC"
+            BorderBrush="#CBD5E1"
+            BorderThickness="1"
+            CornerRadius="12"
+            Margin="10">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <TextBlock Grid.Row="0"
+                       Text="屏幕取色器"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Foreground="#1E293B"
+                       Margin="0,0,0,12" />
+
+            <!-- Magnifier Preview -->
+            <Border Grid.Row="1"
+                    Width="160"
+                    Height="160"
+                    BorderBrush="#CBD5E1"
+                    BorderThickness="2"
+                    CornerRadius="8"
+                    Margin="0,0,0,12"
+                    HorizontalAlignment="Center">
+                <Canvas x:Name="MagnifierCanvas"
+                        Width="160"
+                        Height="160"
+                        ClipToBounds="True" />
+            </Border>
+
+            <!-- Color Preview -->
+            <Border Grid.Row="2"
+                    Width="160"
+                    Height="40"
+                    x:Name="ColorPreview"
+                    Background="#000000"
+                    CornerRadius="6"
+                    Margin="0,0,0,12"
+                    HorizontalAlignment="Center" />
+
+            <!-- Color Values -->
+            <StackPanel Grid.Row="3"
+                        Margin="0,0,0,12">
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="HEX" VerticalAlignment="Center" Foreground="#64748B" />
+                    <TextBox Grid.Column="1"
+                             x:Name="HexValue"
+                             IsReadOnly="True"
+                             Background="#F1F5F9"
+                             BorderBrush="#CBD5E1"
+                             Margin="4,0" />
+                    <Button Grid.Column="2"
+                            Content="复制"
+                            Click="CopyHex_Click"
+                            Style="{StaticResource CopyButton}" />
+                </Grid>
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="RGB" VerticalAlignment="Center" Foreground="#64748B" />
+                    <TextBox Grid.Column="1"
+                             x:Name="RgbValue"
+                             IsReadOnly="True"
+                             Background="#F1F5F9"
+                             BorderBrush="#CBD5E1"
+                             Margin="4,0" />
+                    <Button Grid.Column="2"
+                            Content="复制"
+                            Click="CopyRgb_Click"
+                            Style="{StaticResource CopyButton}" />
+                </Grid>
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="60" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="HSL" VerticalAlignment="Center" Foreground="#64748B" />
+                    <TextBox Grid.Column="1"
+                             x:Name="HslValue"
+                             IsReadOnly="True"
+                             Background="#F1F5F9"
+                             BorderBrush="#CBD5E1"
+                             Margin="4,0" />
+                    <Button Grid.Column="2"
+                            Content="复制"
+                            Click="CopyHsl_Click"
+                            Style="{StaticResource CopyButton}" />
+                </Grid>
+            </StackPanel>
+
+            <!-- History Colors -->
+            <TextBlock Grid.Row="4"
+                       Text="最近颜色"
+                       FontSize="12"
+                       Foreground="#64748B"
+                       Margin="0,0,0,6" />
+            <ItemsControl Grid.Row="5"
+                          x:Name="HistoryColors"
+                          Margin="0,0,0,12">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="24"
+                                Height="24"
+                                CornerRadius="4"
+                                Background="{Binding}"
+                                Margin="2"
+                                Cursor="Hand"
+                                MouseLeftButtonDown="HistoryColor_Click"
+                                ToolTip="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Instructions -->
+            <TextBlock Grid.Row="6"
+                       Text="移动鼠标取色 | 点击复制 | Esc 关闭"
+                       FontSize="11"
+                       Foreground="#94A3B8"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,8" />
+        </Grid>
+    </Border>
+</Window>

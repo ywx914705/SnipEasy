@@ -1,0 +1,195 @@
+<Window x:Class="SnipEasy.App.AnnotationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="截图标注"
+        Width="1180"
+        Height="780"
+        MinWidth="920"
+        MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#F5F7FB"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        KeyDown="Window_KeyDown">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="64" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="72" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="SelectToolButton" MinWidth="76" Click="SelectTool_Click" ToolTip="选择并移动批注对象">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B0;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="选择" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="PenToolButton" MinWidth="76" Click="PenTool_Click" ToolTip="自由画笔">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="画笔" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="RectangleToolButton" MinWidth="76" Click="RectangleTool_Click" ToolTip="矩形标注，画完可拖动">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE739;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="矩形" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="EllipseToolButton" MinWidth="76" Click="EllipseTool_Click" ToolTip="椭圆标注，画完可拖动">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xEA3A;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="椭圆" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="TextToolButton" MinWidth="76" Click="TextTool_Click" ToolTip="添加文字批注">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8D2;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="文字" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="颜色" VerticalAlignment="Center" Foreground="#667085" FontSize="12.5" Margin="0,0,8,0" />
+                    <Button x:Name="RedColorButton" Width="34" MinHeight="34" Padding="0" Click="RedColor_Click" ToolTip="红色">
+                        <Border Width="18" Height="18" Background="#EF4444" CornerRadius="9" />
+                    </Button>
+                    <Button x:Name="BlueColorButton" Width="34" MinHeight="34" Padding="0" Click="BlueColor_Click" ToolTip="蓝色">
+                        <Border Width="18" Height="18" Background="#2563EB" CornerRadius="9" />
+                    </Button>
+                    <Button x:Name="AmberColorButton" Width="34" MinHeight="34" Padding="0" Click="AmberColor_Click" ToolTip="橙色">
+                        <Border Width="18" Height="18" Background="#F59E0B" CornerRadius="9" />
+                    </Button>
+                    <Button x:Name="GreenColorButton" Width="34" MinHeight="34" Padding="0" Click="GreenColor_Click" ToolTip="绿色">
+                        <Border Width="18" Height="18" Background="#10B981" CornerRadius="9" />
+                    </Button>
+                    <Button x:Name="BlackColorButton" Width="34" MinHeight="34" Padding="0" Click="BlackColor_Click" ToolTip="黑色">
+                        <Border Width="18" Height="18" Background="#111827" CornerRadius="9" />
+                    </Button>
+                    <TextBlock Text="粗细" VerticalAlignment="Center" Foreground="#667085" FontSize="12.5" Margin="14,0,8,0" />
+                    <Slider x:Name="StrokeThicknessSlider"
+                            Width="104"
+                            Minimum="2"
+                            Maximum="14"
+                            Value="4"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            VerticalAlignment="Center"
+                            ValueChanged="StrokeThicknessSlider_ValueChanged" />
+                    <TextBlock Text="对象可拖动，方向键微调，Shift+方向键大步移动"
+                               VerticalAlignment="Center"
+                               Foreground="#667085"
+                               FontSize="12.5"
+                               Margin="16,0,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button MinWidth="72" Click="Undo_Click" ToolTip="Ctrl+Z">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7A7;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="撤销" />
+                        </StackPanel>
+                    </Button>
+                    <Button MinWidth="72" Click="Clear_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="清空" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Margin="20" Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+            <Grid>
+                <Viewbox Stretch="Uniform" Margin="18">
+                    <Grid x:Name="CaptureSurface"
+                          Background="#FFFFFF"
+                          SnapsToDevicePixels="True"
+                          ClipToBounds="True">
+                        <Image x:Name="CapturedImage" Stretch="Fill" SnapsToDevicePixels="True" />
+                        <InkCanvas x:Name="AnnotationCanvas"
+                                   Background="Transparent"
+                                   ClipToBounds="True"
+                                   EditingMode="Ink"
+                                   StrokeCollected="AnnotationCanvas_StrokeCollected"
+                                   MouseLeftButtonDown="AnnotationCanvas_MouseLeftButtonDown"
+                                   MouseMove="AnnotationCanvas_MouseMove"
+                                   MouseLeftButtonUp="AnnotationCanvas_MouseLeftButtonUp" />
+                        <Canvas x:Name="SelectionOverlay"
+                                Background="Transparent"
+                                IsHitTestVisible="False">
+                            <Rectangle x:Name="ElementSelectionFrame"
+                                       Stroke="#2563EB"
+                                       StrokeThickness="2"
+                                       StrokeDashArray="4,3"
+                                       Fill="#102563EB"
+                                       Visibility="Collapsed" />
+                        </Canvas>
+                        <Border x:Name="WatermarkBadge"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Margin="20"
+                                Background="#B0111827"
+                                CornerRadius="6"
+                                Padding="12,7"
+                                Visibility="Collapsed">
+                            <TextBlock x:Name="WatermarkPreviewText"
+                                       Foreground="#FFFFFF"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0">
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="WatermarkCheckBox"
+                              Content="添加水印"
+                              VerticalAlignment="Center"
+                              Checked="Watermark_Changed"
+                              Unchecked="Watermark_Changed" />
+                    <TextBox x:Name="WatermarkTextBox"
+                             Width="420"
+                             Margin="10,0,0,0"
+                             TextChanged="WatermarkTextBox_TextChanged" />
+                    <TextBlock x:Name="ImageInfoText"
+                               Foreground="#667085"
+                               FontSize="12.5"
+                               VerticalAlignment="Center"
+                               Margin="14,0,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button MinWidth="92" Click="Cancel_Click" Content="取消" />
+                    <Button MinWidth="92" Click="SaveOnly_Click" Content="仅保存" />
+                    <Button MinWidth="132" Background="#2563EB" BorderBrush="#1D4ED8" Foreground="#FFFFFF" Click="CopyAndSave_Click" ToolTip="Ctrl+Enter">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="15" Margin="0,0,8,0" />
+                            <TextBlock Text="复制并保存" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

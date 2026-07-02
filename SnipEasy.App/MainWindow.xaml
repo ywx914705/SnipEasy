@@ -1,0 +1,1117 @@
+<Window x:Class="SnipEasy.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SnipEasy"
+        Icon="pack://application:,,,/Assets/SnipEasy.ico"
+        Width="1100"
+        Height="740"
+        MinWidth="960"
+        MinHeight="640"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        WindowStartupLocation="CenterScreen"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+    <Window.Resources>
+        <!-- ======================== Swiss 色板：纯白 + 蓝 ======================== -->
+        <Color x:Key="PrimaryColor">#2563EB</Color>
+        <Color x:Key="PrimaryHoverColor">#1D4ED8</Color>
+        <Color x:Key="PrimaryLightColor">#DBEAFE</Color>
+        <Color x:Key="TealColor">#059669</Color>
+        <Color x:Key="WarningColor">#D97706</Color>
+        <Color x:Key="DangerColor">#DC2626</Color>
+        <Color x:Key="SurfaceColor">#FFFFFF</Color>
+        <Color x:Key="WashColor">#F8FAFC</Color>
+        <Color x:Key="PanelColor">#F1F5F9</Color>
+        <Color x:Key="BorderColor">#E2E8F0</Color>
+        <Color x:Key="BorderDarkColor">#CBD5E1</Color>
+        <Color x:Key="TextPrimaryColor">#0F172A</Color>
+        <Color x:Key="TextSecondaryColor">#334155</Color>
+        <Color x:Key="TextMutedColor">#64748B</Color>
+        <Color x:Key="KeycapDarkColor">#1E293B</Color>
+        <Color x:Key="KeycapMidColor">#334155</Color>
+
+        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}" />
+        <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}" />
+        <SolidColorBrush x:Key="TealBrush" Color="{StaticResource TealColor}" />
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
+        <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+        <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+        <SolidColorBrush x:Key="WashBrush" Color="{StaticResource WashColor}" />
+        <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}" />
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+        <SolidColorBrush x:Key="BorderDarkBrush" Color="{StaticResource BorderDarkColor}" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
+        <SolidColorBrush x:Key="KeycapDarkBrush" Color="{StaticResource KeycapDarkColor}" />
+        <SolidColorBrush x:Key="KeycapMidBrush" Color="{StaticResource KeycapMidColor}" />
+
+        <!-- ======================== 阴影 ======================== -->
+        <DropShadowEffect x:Key="CardShadow"
+                          BlurRadius="16"
+                          ShadowDepth="2"
+                          Direction="270"
+                          Opacity="0.06"
+                          Color="#0F172A" />
+        <DropShadowEffect x:Key="KeycapShadow"
+                          BlurRadius="0"
+                          ShadowDepth="5"
+                          Direction="270"
+                          Opacity="0.35"
+                          Color="#0F172A" />
+        <DropShadowEffect x:Key="KeycapHoverShadow"
+                          BlurRadius="0"
+                          ShadowDepth="7"
+                          Direction="270"
+                          Opacity="0.45"
+                          Color="#2563EB" />
+
+        <!-- ======================== 主按钮 ======================== -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="Padding" Value="20,9" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== 次按钮 ======================== -->
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDarkBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#F8FAFC" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryLightBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== 键帽按钮 ======================== -->
+        <Style x:Key="KeycapButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Width" Value="160" />
+            <Setter Property="Height" Value="150" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="card"
+                                CornerRadius="12"
+                                Background="White"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                Padding="0"
+                                Effect="{StaticResource CardShadow}">
+                            <Grid>
+                                <!-- 顶部蓝色强调条 -->
+                                <Border x:Name="accent"
+                                        Height="4"
+                                        Background="{StaticResource PrimaryBrush}"
+                                        VerticalAlignment="Top"
+                                        CornerRadius="12,12,0,0" />
+                                <!-- 内容 -->
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="0,10,0,0">
+                                    <ContentPresenter HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                                <Setter TargetName="card" Property="Background" Value="#FAFBFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="card" Property="Background" Value="{StaticResource PrimaryLightBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="card" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== 输入框 ======================== -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDarkBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CaretBrush" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== 复选框 ======================== -->
+        <Style x:Key="ModernCheckBox" TargetType="CheckBox">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border x:Name="checkBorder"
+                                    Width="18" Height="18"
+                                    CornerRadius="4"
+                                    BorderBrush="{StaticResource BorderDarkBrush}"
+                                    BorderThickness="1.5"
+                                    Background="White"
+                                    Margin="0,0,8,0">
+                                <TextBlock x:Name="checkMark"
+                                           Text="&#xE73E;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="10"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkBorder" Property="Background" Value="{StaticResource PrimaryBrush}" />
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== 下拉框 ======================== -->
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          Cursor="Hand"
+                                          Focusable="False">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="ButtonBorder"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="6"
+                                                Padding="10,0,6,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter x:Name="ContentSite"
+                                                                  Grid.Column="0"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Left"
+                                                                  Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                  ContentStringFormat="{TemplateBinding ContentStringFormat}" />
+                                                <TextBlock Grid.Column="1"
+                                                           Text="&#xE70D;"
+                                                           FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="10"
+                                                           Foreground="{StaticResource TextMutedBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="6,0,0,0" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border x:Name="DropDownBorder"
+                                        Background="{StaticResource SurfaceBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="4"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        Effect="{StaticResource CardShadow}">
+                                    <ScrollViewer CanContentScroll="True">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ======================== 标题 ======================== -->
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+        </Style>
+
+        <!-- ======================== 热键输入框 ======================== -->
+        <Style x:Key="HotkeyTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDarkBrush}" />
+        </Style>
+
+        <!-- ======================== ScrollViewer ======================== -->
+        <Style x:Key="SlimScrollBar" TargetType="ScrollViewer">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                        <Grid>
+                            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                                    CanContentScroll="{TemplateBinding CanContentScroll}"
+                                                    CanHorizontallyScroll="False"
+                                                    CanVerticallyScroll="True"
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                    Content="{TemplateBinding Content}"
+                                                    Margin="{TemplateBinding Padding}" />
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                       HorizontalAlignment="Right"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       Orientation="Vertical"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                       Width="5" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ======================== DataGrid ======================== -->
+        <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="RowHeight" Value="32" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        </Style>
+
+        <!-- ======================== 设置卡片 ======================== -->
+        <Style x:Key="SettingsCard" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="20,16" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Effect" Value="{StaticResource CardShadow}" />
+        </Style>
+    </Window.Resources>
+
+    <!-- ======================== 主布局 ======================== -->
+    <Grid Background="{StaticResource WashBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ======================== 顶部导航栏 ======================== -->
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid Margin="28,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="10"
+                            Width="40"
+                            Height="40"
+                            Margin="0,0,14,0">
+                        <Image Source="Assets/SnipEasyMark.png"
+                               Width="26"
+                               Height="26"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="SnipEasy"
+                                   FontSize="19"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="截图 · 批注 · 录屏"
+                                   FontSize="11.5"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   Margin="0,1,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Click="ShowFirstRunGuide_Click"
+                            Padding="10,6"
+                            Margin="0,0,5,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE946;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,4,0" />
+                            <TextBlock Text="使用指南" VerticalAlignment="Center" FontSize="11.5" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Click="OpenSaveDirectory_Click"
+                            Padding="10,6"
+                            Margin="0,0,5,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B7;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,4,0" />
+                            <TextBlock Text="截图目录" VerticalAlignment="Center" FontSize="11.5" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Click="OpenVideoDirectory_Click"
+                            Padding="10,6">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE714;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,4,0" />
+                            <TextBlock Text="录屏目录" VerticalAlignment="Center" FontSize="11.5" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ======================== 状态条 ======================== -->
+        <Border Grid.Row="1"
+                Background="White"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid Margin="24,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="StatusText"
+                           VerticalAlignment="Center"
+                           FontSize="12.5"
+                           Foreground="{StaticResource TextSecondaryBrush}" />
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Ellipse Width="7" Height="7"
+                             Fill="{StaticResource TealBrush}"
+                             Margin="0,0,7,0" />
+                    <TextBlock x:Name="EngineStatusText"
+                               VerticalAlignment="Center"
+                               FontSize="11.5"
+                               Foreground="{StaticResource TextMutedBrush}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ======================== 主内容区 ======================== -->
+        <Grid Grid.Row="2" Margin="28,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="400" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="350" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ========== 左侧：快捷操作 + 历史 ========== -->
+            <ScrollViewer Grid.Column="0"
+                          Style="{StaticResource SlimScrollBar}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,0,16,0">
+                <StackPanel>
+                    <!-- 四个键帽按钮 -->
+                    <UniformGrid Rows="2" Columns="2" Margin="0,0,0,22">
+                        <!-- F1 -->
+                        <Button x:Name="CaptureButton"
+                                Style="{StaticResource KeycapButton}"
+                                Click="CaptureButton_Click"
+                                Margin="0,0,8,8">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="{StaticResource PrimaryBrush}"
+                                        CornerRadius="8" Width="48" Height="48"
+                                        Margin="0,0,0,10">
+                                    <TextBlock Text="F1"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="&#xE722;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="28"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,6" />
+                                <TextBlock Text="区域截图"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- F2 -->
+                        <Button x:Name="RecordingButton"
+                                Style="{StaticResource KeycapButton}"
+                                Click="RecordingButton_Click"
+                                Margin="8,0,0,8">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="{StaticResource TealBrush}"
+                                        CornerRadius="8" Width="48" Height="48"
+                                        Margin="0,0,0,10">
+                                    <TextBlock Text="F2"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="&#xE714;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="28"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,6" />
+                                <TextBlock x:Name="RecordingButtonLabel"
+                                           Text="开始录屏"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- F3 -->
+                        <Button Style="{StaticResource KeycapButton}"
+                                Margin="0,0,8,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="#9333EA"
+                                        CornerRadius="8" Width="48" Height="48"
+                                        Margin="0,0,0,10">
+                                    <TextBlock Text="F3"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="&#xE8B0;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="28"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,6" />
+                                <TextBlock Text="贴图到屏幕"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- F4 -->
+                        <Button Style="{StaticResource KeycapButton}"
+                                Margin="8,0,0,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="#EA580C"
+                                        CornerRadius="8" Width="48" Height="48"
+                                        Margin="0,0,0,10">
+                                    <TextBlock Text="F4"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="&#xE790;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="28"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,6" />
+                                <TextBlock Text="屏幕取色"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+
+                    <!-- 分隔线 -->
+                    <Border Height="1"
+                            Background="{StaticResource BorderBrush}"
+                            Margin="0,0,0,20" />
+
+                    <!-- 最近记录 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="最近记录"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextMutedBrush}" />
+                        <TextBlock x:Name="HistorySummaryText"
+                                   Text="{Binding History.SummaryText}"
+                                   Grid.Column="1"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- 搜索 -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="120" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="HistorySearchTextBox"
+                                 Style="{StaticResource ModernTextBox}"
+                                 TextChanged="HistorySearchTextBox_TextChanged" />
+                        <ComboBox x:Name="HistoryKindFilterComboBox"
+                                  Grid.Column="2"
+                                  Style="{StaticResource ModernComboBox}"
+                                  SelectionChanged="HistoryKindFilterComboBox_SelectionChanged">
+                            <ComboBoxItem Content="全部" Tag="" />
+                            <ComboBoxItem Content="截图" Tag="Screenshot" />
+                            <ComboBoxItem Content="录屏" Tag="Recording" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 历史列表 -->
+                    <Border Background="White"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="0"
+                            MinHeight="180"
+                            Effect="{StaticResource CardShadow}">
+                        <DataGrid x:Name="HistoryGrid"
+                                  ItemsSource="{Binding History.VisibleRecords}"
+                                  Style="{StaticResource ModernDataGrid}"
+                                  MouseDoubleClick="HistoryGrid_MouseDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="类型"
+                                                    Binding="{Binding KindDisplay}"
+                                                    Width="55" />
+                                <DataGridTextColumn Header="时间"
+                                                    Binding="{Binding CreatedAt, StringFormat=HH:mm:ss}"
+                                                    Width="75" />
+                                <DataGridTextColumn Header="文件名"
+                                                    Binding="{Binding FileNameDisplay}"
+                                                    Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- 分隔线 -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource BorderBrush}"
+                    Margin="0" />
+
+            <!-- ========== 右侧：设置 ========== -->
+            <ScrollViewer Grid.Column="2"
+                          Style="{StaticResource SlimScrollBar}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="16,0,0,0">
+                <StackPanel>
+                    <!-- 录屏 -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <TextBlock Text="录屏设置"
+                                       Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="录屏模式" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="RecordingModeComboBox"
+                                      Style="{StaticResource ModernComboBox}"
+                                      Margin="0,0,0,4"
+                                      SelectionChanged="RecordingModeComboBox_SelectionChanged">
+                                <ComboBoxItem Content="流畅优先" Tag="Smooth" />
+                                <ComboBoxItem Content="均衡" Tag="Balanced" />
+                                <ComboBoxItem Content="清晰优先" Tag="Quality" />
+                            </ComboBox>
+                            <TextBlock x:Name="RecordingModeDescriptionText"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       FontSize="11"
+                                       Margin="0,0,0,10" />
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="帧率 FPS" Style="{StaticResource FieldLabel}" />
+                                    <TextBox x:Name="FrameRateTextBox" Style="{StaticResource ModernTextBox}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="画质 CRF" Style="{StaticResource FieldLabel}" />
+                                    <TextBox x:Name="CrfTextBox" Style="{StaticResource ModernTextBox}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="RecordingParameterHintText"
+                                       Text="范围：FPS 1-30，CRF 18-35"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       FontSize="10.5" />
+
+                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,10,0,10" />
+
+                            <CheckBox x:Name="PreferFfmpegCheckBox"
+                                      Content="优先 FFmpeg（MP4 + 音频）"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,6" />
+                            <CheckBox x:Name="AllowLocalAviFallbackCheckBox"
+                                      Content="FFmpeg 不可用时回退 AVI"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,10" />
+                            <TextBlock Text="FFmpeg 路径" Style="{StaticResource FieldLabel}" />
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="5" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FfmpegPathTextBox" Style="{StaticResource ModernTextBox}" />
+                                <Button Grid.Column="2" Style="{StaticResource SecondaryButton}"
+                                        Content="浏览" Click="BrowseFfmpeg_Click" Padding="10,5" />
+                            </Grid>
+                            <TextBlock x:Name="FfmpegPathHintText"
+                                       Text="未安装时只能无声音录屏"
+                                       Foreground="{StaticResource WarningBrush}" FontSize="10.5" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 音频 -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <TextBlock Text="音频录制" Style="{StaticResource SectionTitle}" />
+                            <CheckBox x:Name="CaptureSystemAudioCheckBox"
+                                      Content="录制系统声音"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,4" />
+                            <TextBlock Text="系统声音设备" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="SystemAudioDeviceComboBox"
+                                      Style="{StaticResource ModernComboBox}"
+                                      IsEditable="True" Margin="0,0,0,10" />
+                            <CheckBox x:Name="CaptureMicrophoneCheckBox"
+                                      Content="录制麦克风"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,4" />
+                            <TextBlock Text="麦克风设备" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="MicrophoneDeviceComboBox"
+                                      Style="{StaticResource ModernComboBox}"
+                                      IsEditable="True" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 快捷键 -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <TextBlock Text="快捷键" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="点击快捷键可自定义修改"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       FontSize="10.5" Margin="0,0,0,14" />
+
+                            <!-- 截图热键 -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{StaticResource PrimaryBrush}"
+                                        CornerRadius="6" Width="32" Height="32"
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE722;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16" Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="区域截图" FontWeight="SemiBold"
+                                               FontSize="12.5"
+                                               Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="框选区域后批注" FontSize="10.5"
+                                               Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Border Grid.Column="2" x:Name="ScreenshotHotkeyBorder"
+                                        Background="White"
+                                        BorderBrush="{StaticResource BorderDarkBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Cursor="Hand"
+                                        Padding="0"
+                                        VerticalAlignment="Center"
+                                        PreviewMouseDown="ScreenshotHotkeyTextBox_MouseDown">
+                                    <TextBlock x:Name="ScreenshotHotkeyDisplay"
+                                               Text="F1"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               MinHeight="36"
+                                               Padding="10,0" />
+                                </Border>
+                            </Grid>
+
+                            <!-- 录屏热键 -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{StaticResource TealBrush}"
+                                        CornerRadius="6" Width="32" Height="32"
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE714;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16" Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="屏幕录制" FontWeight="SemiBold"
+                                               FontSize="12.5"
+                                               Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="录制屏幕和音频" FontSize="10.5"
+                                               Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Border Grid.Column="2" x:Name="RecordingHotkeyBorder"
+                                        Background="White"
+                                        BorderBrush="{StaticResource BorderDarkBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Cursor="Hand"
+                                        VerticalAlignment="Center"
+                                        PreviewMouseDown="RecordingHotkeyTextBox_MouseDown">
+                                    <TextBlock x:Name="RecordingHotkeyDisplay"
+                                               Text="F2"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               MinHeight="36"
+                                               Padding="10,0" />
+                                </Border>
+                            </Grid>
+
+                            <!-- 贴图热键 -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="#9333EA"
+                                        CornerRadius="6" Width="32" Height="32"
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE8B0;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16" Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="贴图到屏幕" FontWeight="SemiBold"
+                                               FontSize="12.5"
+                                               Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="截图钉在屏幕上" FontSize="10.5"
+                                               Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Border Grid.Column="2" x:Name="StickerHotkeyBorder"
+                                        Background="White"
+                                        BorderBrush="{StaticResource BorderDarkBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Cursor="Hand"
+                                        VerticalAlignment="Center"
+                                        PreviewMouseDown="StickerHotkeyTextBox_MouseDown">
+                                    <TextBlock x:Name="StickerHotkeyDisplay"
+                                               Text="F3"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               MinHeight="36"
+                                               Padding="10,0" />
+                                </Border>
+                            </Grid>
+
+                            <!-- 取色热键 -->
+                            <Grid Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="#EA580C"
+                                        CornerRadius="6" Width="32" Height="32"
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="&#xE790;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="16" Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="屏幕取色" FontWeight="SemiBold"
+                                               FontSize="12.5"
+                                               Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="拾取屏幕颜色值" FontSize="10.5"
+                                               Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Border Grid.Column="2" x:Name="ColorPickerHotkeyBorder"
+                                        Background="White"
+                                        BorderBrush="{StaticResource BorderDarkBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Cursor="Hand"
+                                        VerticalAlignment="Center"
+                                        PreviewMouseDown="ColorPickerHotkeyTextBox_MouseDown">
+                                    <TextBlock x:Name="ColorPickerHotkeyDisplay"
+                                               Text="F4"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               MinHeight="36"
+                                               Padding="10,0" />
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 保存目录 -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <TextBlock Text="保存目录" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="截图目录" Style="{StaticResource FieldLabel}" />
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="5" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="ScreenshotDirectoryTextBox" Style="{StaticResource ModernTextBox}" />
+                                <Button Grid.Column="2" Style="{StaticResource SecondaryButton}"
+                                        Content="选择" Click="BrowseScreenshotDirectory_Click" Padding="10,5" />
+                            </Grid>
+                            <TextBlock x:Name="ScreenshotDefaultText"
+                                       Foreground="{StaticResource TextMutedBrush}" FontSize="10.5" Margin="0,0,0,10" />
+                            <TextBlock Text="录屏目录" Style="{StaticResource FieldLabel}" />
+                            <Grid Margin="0,0,0,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="5" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="VideoDirectoryTextBox" Style="{StaticResource ModernTextBox}" />
+                                <Button Grid.Column="2" Style="{StaticResource SecondaryButton}"
+                                        Content="选择" Click="BrowseVideoDirectory_Click" Padding="10,5" />
+                            </Grid>
+                            <TextBlock x:Name="VideoDefaultText"
+                                       Foreground="{StaticResource TextMutedBrush}" FontSize="10.5" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 其他 -->
+                    <Border Style="{StaticResource SettingsCard}">
+                        <StackPanel>
+                            <TextBlock Text="其他设置" Style="{StaticResource SectionTitle}" />
+                            <CheckBox x:Name="WatermarkCheckBox" Content="截图时添加水印"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,6" />
+                            <TextBox x:Name="WatermarkTextBox" Style="{StaticResource ModernTextBox}"
+                                     Margin="0,0,0,10" />
+                            <CheckBox x:Name="StartWithWindowsCheckBox" Content="开机自动启动"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,6"
+                                      Checked="StartWithWindows_Changed" Unchecked="StartWithWindows_Changed" />
+                            <CheckBox x:Name="MinimizeToTrayOnCloseCheckBox" Content="关闭时最小化到托盘"
+                                      Style="{StaticResource ModernCheckBox}" Margin="0,0,0,10" />
+                            <TextBlock Text="历史保留" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="HistoryRetentionComboBox"
+                                      Style="{StaticResource ModernComboBox}" Margin="0,0,0,10">
+                                <ComboBoxItem Content="30 天" Tag="30" />
+                                <ComboBoxItem Content="90 天" Tag="90" />
+                                <ComboBoxItem Content="180 天" Tag="180" />
+                                <ComboBoxItem Content="365 天" Tag="365" />
+                                <ComboBoxItem Content="永久" Tag="0" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 保存按钮 - 独立于卡片之外 -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Content="保存所有设置"
+                            Click="SaveSettings_Click"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,4,0,0" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ======================== 底部 ======================== -->
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0">
+            <Grid Margin="24,6">
+                <TextBlock x:Name="FooterText"
+                           VerticalAlignment="Center"
+                           FontSize="11"
+                           Foreground="{StaticResource TextMutedBrush}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
