@@ -54,6 +54,7 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .header-inner{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px}
 .logo{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:800;color:var(--g900)}.logo img{border-radius:8px}
 .nav{display:flex;align-items:center;gap:28px}
+.nav .nav-cta+.nav-cta{margin-left:-12px}
 .nav a{font-size:13px;font-weight:500;color:var(--g500);transition:.2s;position:relative}
 .nav a:hover{color:var(--g900)}
 .nav a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--blue600);border-radius:1px;transition:width .3s var(--ease)}.nav a:hover::after{width:100%}
