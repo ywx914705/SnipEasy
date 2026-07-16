@@ -40,6 +40,12 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        if (e.Args.Any(arg => string.Equals(arg, "--record-pause-test", StringComparison.OrdinalIgnoreCase)))
+        {
+            RecordPauseTestAndExit();
+            return;
+        }
+
         _singleInstanceMutex = new Mutex(initiallyOwned: true, "SnipEasy.Desktop.SingleInstance", out _ownsSingleInstanceMutex);
         if (!_ownsSingleInstanceMutex)
         {
@@ -157,7 +163,11 @@ public partial class App : System.Windows.Application
             using var recordingService = new LocalAviRecordingService();
             // StartAsync returns synchronously (Task.FromResult) — no deadlock risk.
             var outputPath = recordingService.StartAsync(settings).GetAwaiter().GetResult();
-            Thread.Sleep(TimeSpan.FromSeconds(2));
+            Thread.Sleep(TimeSpan.FromMilliseconds(750));
+            recordingService.PauseAsync().GetAwaiter().GetResult();
+            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            recordingService.ResumeAsync().GetAwaiter().GetResult();
+            Thread.Sleep(TimeSpan.FromMilliseconds(750));
             var record = recordingService.StopAsync().GetAwaiter().GetResult();
 
             var clipboardService = new ClipboardService();
@@ -172,6 +182,57 @@ public partial class App : System.Windows.Application
         {
             logger?.Error("RecordTest failed", ex);
             TryWriteCrashReport(ex, "RecordTestAndExit", logger);
+            ExitHeadless(1);
+        }
+    }
+
+    private void RecordPauseTestAndExit()
+    {
+        AppLogger? logger = null;
+        try
+        {
+            var paths = AppPaths.Create();
+            logger = new AppLogger(paths.LogPath);
+            var settingsStore = new JsonFileStore<AppSettings>(paths.SettingsPath);
+            var historyStore = new JsonFileStore<List<CaptureRecord>>(paths.HistoryPath);
+            var settings = settingsStore.LoadOrDefault(() => new AppSettings());
+            settings.PreferFfmpegRecording = true;
+            settings.AllowLocalAviFallback = false;
+            settings.RecordingCaptureSystemAudio = false;
+            settings.RecordingCaptureMicrophone = false;
+            settings.RecordingFrameRate = Math.Clamp(settings.RecordingFrameRate, 4, 12);
+
+            using var recordingService = new RecordingServiceCoordinator(logger);
+            var outputPath = recordingService.StartAsync(settings).GetAwaiter().GetResult();
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            recordingService.PauseAsync().GetAwaiter().GetResult();
+            if (!recordingService.IsPaused)
+            {
+                throw new InvalidOperationException("FFmpeg pause smoke test did not enter the paused state.");
+            }
+
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+            recordingService.ResumeAsync().GetAwaiter().GetResult();
+            if (recordingService.IsPaused)
+            {
+                throw new InvalidOperationException("FFmpeg pause smoke test did not resume recording.");
+            }
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            var record = recordingService.StopAsync().GetAwaiter().GetResult();
+
+            var clipboardService = new ClipboardService();
+            clipboardService.SetFileDrop(outputPath);
+
+            var history = historyStore.LoadOrDefault(() => []);
+            history.Insert(0, record);
+            historyStore.Save(history.Take(1000).ToList());
+            ExitHeadless(0);
+        }
+        catch (Exception ex)
+        {
+            logger?.Error("RecordPauseTest failed", ex);
+            TryWriteCrashReport(ex, "RecordPauseTestAndExit", logger);
             ExitHeadless(1);
         }
     }

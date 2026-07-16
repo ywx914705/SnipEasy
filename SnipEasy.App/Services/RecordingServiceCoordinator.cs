@@ -16,6 +16,7 @@ public sealed class RecordingServiceCoordinator : IRecordingService
     }
 
     public bool IsRecording => _activeService?.IsRecording == true;
+    public bool IsPaused => _activeService?.IsPaused == true;
     public string EngineName => _activeService?.EngineName ?? GetPreferredEngineName();
     public string LastFallbackReason { get; private set; } = "";
 
@@ -94,6 +95,26 @@ public sealed class RecordingServiceCoordinator : IRecordingService
         var record = await _activeService.StopAsync().ConfigureAwait(false);
         _activeService = null;
         return record;
+    }
+
+    public Task PauseAsync()
+    {
+        if (_activeService is null || !_activeService.IsRecording)
+        {
+            throw new InvalidOperationException("当前没有正在进行的录屏。");
+        }
+
+        return _activeService.PauseAsync();
+    }
+
+    public Task ResumeAsync()
+    {
+        if (_activeService is null || !_activeService.IsRecording)
+        {
+            throw new InvalidOperationException("当前没有正在进行的录屏。");
+        }
+
+        return _activeService.ResumeAsync();
     }
 
     public void Dispose()

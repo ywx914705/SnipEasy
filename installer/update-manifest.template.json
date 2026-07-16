@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "downloadPath": "SnipEasy-Setup.exe",
-  "notes": "Smart window capture, offline OCR, delayed capture, privacy and reliability upgrades."
+  "notes": "Recording pause/resume controls, an explicit finish action, and a calmer screenshot selection overlay."
 }

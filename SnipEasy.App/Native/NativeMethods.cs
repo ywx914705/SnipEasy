@@ -25,6 +25,7 @@ internal static class NativeMethods
     public const uint ModWin = 0x0008;
     public const uint ModNoRepeat = 0x4000;
     public const uint WdaExcludeFromCapture = 0x00000011;
+    public const uint ThreadSuspendResume = 0x0002;
 
     public delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
     public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -94,6 +95,19 @@ internal static class NativeMethods
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern IntPtr GetModuleHandle(string? lpModuleName);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr OpenThread(uint dwDesiredAccess, bool bInheritHandle, uint dwThreadId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseHandle(IntPtr hObject);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern uint SuspendThread(IntPtr hThread);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern uint ResumeThread(IntPtr hThread);
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

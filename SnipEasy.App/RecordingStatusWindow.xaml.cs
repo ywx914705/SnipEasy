@@ -15,6 +15,9 @@ public partial class RecordingStatusWindow : Window
     private readonly string _recordingSubtitle;
     private readonly DispatcherTimer _timer;
     private bool _stopRequested;
+    private bool _isPaused;
+    private DateTimeOffset? _pausedAt;
+    private TimeSpan _pausedDuration;
     private int _lastSecond = -1;
 
     public RecordingStatusWindow(DateTimeOffset startedAt, string subtitle)
@@ -32,17 +35,22 @@ public partial class RecordingStatusWindow : Window
     }
 
     public event EventHandler? StopRequested;
+    public event EventHandler? PauseRequested;
     public event EventHandler? SaveRequested;
     public event EventHandler? CancelRequested;
 
     public void ShowStoppingState()
     {
+        CommitPausedDuration();
         _stopRequested = true;
+        _isPaused = false;
         _timer.Stop();
         StatusText.Text = "正在停止";
         RouteText.Text = "封装视频中...";
         ActionHintText.Text = "请稍候";
-        StopButtonLabel.Text = "停止中";
+        StopButtonLabel.Text = "完成中";
+        PauseButton.IsEnabled = false;
+        PauseButton.Visibility = Visibility.Visible;
         StopButton.IsEnabled = false;
         StopButton.Visibility = Visibility.Visible;
         DecisionPanel.Visibility = Visibility.Collapsed;
@@ -50,15 +58,51 @@ public partial class RecordingStatusWindow : Window
 
     public void ShowRecordingState(string? status = null)
     {
+        CommitPausedDuration();
         _stopRequested = false;
+        _isPaused = false;
         StatusText.Text = string.IsNullOrWhiteSpace(status) ? "录制中" : status;
         RouteText.Text = _recordingSubtitle;
-        ActionHintText.Text = "F2 停止";
-        StopButtonLabel.Text = "停止";
+        ActionHintText.Text = "F2 完成";
+        PauseButtonLabel.Text = "暂停";
+        PauseButtonIcon.Text = "\uE769";
+        PauseButton.ToolTip = "暂停录屏";
+        PauseButton.IsEnabled = true;
+        PauseButton.Visibility = Visibility.Visible;
+        RecordDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+        RecordDotGlow.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+        StopButtonLabel.Text = "完成录制";
         StopButton.IsEnabled = true;
         StopButton.Visibility = Visibility.Visible;
         DecisionPanel.Visibility = Visibility.Collapsed;
         _timer.Start();
+    }
+
+    public void ShowPausedState()
+    {
+        if (_stopRequested)
+        {
+            return;
+        }
+
+        if (!_isPaused)
+        {
+            _pausedAt = DateTimeOffset.Now;
+        }
+
+        _isPaused = true;
+        UpdateElapsed();
+        _timer.Stop();
+        StatusText.Text = "已暂停";
+        RouteText.Text = "暂停期间不会写入视频";
+        ActionHintText.Text = "可继续或完成";
+        PauseButtonLabel.Text = "继续";
+        PauseButtonIcon.Text = "\uE768";
+        PauseButton.ToolTip = "继续录屏";
+        PauseButton.IsEnabled = true;
+        RecordDot.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184));
+        RecordDotGlow.Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184));
+        StopButton.IsEnabled = true;
     }
 
     public void ShowDecisionState(string fileName, string saveDirectory)
@@ -68,6 +112,7 @@ public partial class RecordingStatusWindow : Window
         StatusText.Text = "已完成";
         RouteText.Text = string.IsNullOrWhiteSpace(fileName) ? "选择保存或取消" : fileName;
         ActionHintText.Text = saveDirectory;
+        PauseButton.Visibility = Visibility.Collapsed;
         StopButton.Visibility = Visibility.Collapsed;
         DecisionPanel.Visibility = Visibility.Visible;
         SaveButton.IsEnabled = true;
@@ -127,6 +172,17 @@ public partial class RecordingStatusWindow : Window
         StopRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private void PauseButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_stopRequested)
+        {
+            return;
+        }
+
+        PauseButton.IsEnabled = false;
+        PauseRequested?.Invoke(this, EventArgs.Empty);
+    }
+
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         ShowSavingState();
@@ -157,7 +213,8 @@ public partial class RecordingStatusWindow : Window
 
     private void UpdateElapsed()
     {
-        var elapsed = DateTimeOffset.Now - _startedAt;
+        var effectiveNow = _pausedAt ?? DateTimeOffset.Now;
+        var elapsed = effectiveNow - _startedAt - _pausedDuration;
         if (elapsed < TimeSpan.Zero)
         {
             elapsed = TimeSpan.Zero;
@@ -182,6 +239,17 @@ public partial class RecordingStatusWindow : Window
             var storyboard = (System.Windows.Media.Animation.Storyboard)FindResource("SecondTick");
             storyboard.Begin();
         }
+    }
+
+    private void CommitPausedDuration()
+    {
+        if (_pausedAt is null)
+        {
+            return;
+        }
+
+        _pausedDuration += DateTimeOffset.Now - _pausedAt.Value;
+        _pausedAt = null;
     }
 
     private void PlaceNearTopRight()

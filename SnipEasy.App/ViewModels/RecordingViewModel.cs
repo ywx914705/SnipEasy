@@ -38,6 +38,9 @@ public partial class RecordingViewModel : ObservableObject
     private bool _isRecording;
 
     [ObservableProperty]
+    private bool _isPaused;
+
+    [ObservableProperty]
     private bool _isStopping;
 
     [ObservableProperty]
@@ -120,6 +123,11 @@ public partial class RecordingViewModel : ObservableObject
     public event EventHandler<string?>? ShowRecordingStateRequested;
 
     /// <summary>
+    /// Event raised when the recording status window should show the paused state.
+    /// </summary>
+    public event EventHandler? ShowPausedStateRequested;
+
+    /// <summary>
     /// Event raised when settings need to be validated/applied from the UI before recording.
     /// The handler sets <see cref="SettingsValidationEventArgs.IsValid"/> to indicate result.
     /// </summary>
@@ -161,6 +169,56 @@ public partial class RecordingViewModel : ObservableObject
         else
         {
             await RequestStartRecordingAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async System.Threading.Tasks.Task TogglePauseRecordingAsync()
+    {
+        if (_commandBusy || !_recordingService.IsRecording)
+        {
+            return;
+        }
+
+        _commandBusy = true;
+        try
+        {
+            if (_recordingService.IsPaused)
+            {
+                await _recordingService.ResumeAsync();
+                IsPaused = false;
+                ShowRecordingStateRequested?.Invoke(this, null);
+                StatusRefreshRequested?.Invoke(this, "录屏已继续。");
+                _logger.Info("Recording resumed by user.");
+            }
+            else
+            {
+                await _recordingService.PauseAsync();
+                IsPaused = true;
+                ShowPausedStateRequested?.Invoke(this, EventArgs.Empty);
+                StatusRefreshRequested?.Invoke(this, "录屏已暂停。");
+                _logger.Info("Recording paused by user.");
+            }
+        }
+        catch (Exception ex)
+        {
+            IsPaused = _recordingService.IsPaused;
+            if (IsPaused)
+            {
+                ShowPausedStateRequested?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                ShowRecordingStateRequested?.Invoke(this, "暂停操作失败，仍在录屏");
+            }
+
+            _logger.Error("Recording pause/resume failed.", ex);
+            StatusRefreshRequested?.Invoke(this, $"录屏暂停操作失败：{ex.Message}");
+        }
+        finally
+        {
+            _commandBusy = false;
+            UpdateButtonLabel();
         }
     }
 
@@ -333,6 +391,7 @@ public partial class RecordingViewModel : ObservableObject
                 _recordingDraftService.CreateDraftSettings(_settings));
 
             IsRecording = true;
+            IsPaused = false;
             UpdateButtonLabel();
             ShowRecordingStatusRequested?.Invoke(this, (startedAt, BuildStatusSubtitle()));
 
@@ -363,6 +422,7 @@ public partial class RecordingViewModel : ObservableObject
 
         _commandBusy = true;
         IsStopping = true;
+        IsPaused = false;
         ShowStoppingStateRequested?.Invoke(this, EventArgs.Empty);
         _logger.Info("Recording stop requested.");
         StatusRefreshRequested?.Invoke(this, "正在停止录屏并写入文件...");
@@ -376,6 +436,7 @@ public partial class RecordingViewModel : ObservableObject
                 : _pendingRecordingSaveDirectory;
 
             IsRecording = false;
+            IsPaused = false;
             HasPendingDecision = true;
             PendingFileName = System.IO.Path.GetFileName(record.FilePath);
             PendingSaveDirectory = _pendingRecordingSaveDirectory;
@@ -392,7 +453,15 @@ public partial class RecordingViewModel : ObservableObject
             if (_recordingService.IsRecording)
             {
                 IsRecording = true;
-                ShowRecordingStateRequested?.Invoke(this, "停止失败，仍在录屏");
+                IsPaused = _recordingService.IsPaused;
+                if (IsPaused)
+                {
+                    ShowPausedStateRequested?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    ShowRecordingStateRequested?.Invoke(this, "停止失败，仍在录屏");
+                }
             }
             else
             {

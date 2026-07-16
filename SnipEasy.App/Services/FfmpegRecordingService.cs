@@ -15,6 +15,9 @@ public sealed class FfmpegRecordingService : IRecordingService
     private string _activeFilePath = "";
     private DateTimeOffset _startedAt;
     private string _stderrTail = "";
+    private readonly object _pauseSync = new();
+    private HashSet<uint> _suspendedThreadIds = [];
+    private bool _isPaused;
 
     public FfmpegRecordingService(AppLogger logger)
     {
@@ -22,6 +25,17 @@ public sealed class FfmpegRecordingService : IRecordingService
     }
 
     public bool IsRecording => _process is { HasExited: false };
+    public bool IsPaused
+    {
+        get
+        {
+            lock (_pauseSync)
+            {
+                return _isPaused && IsRecording;
+            }
+        }
+    }
+
     public string EngineName => "FFmpeg MP4 后端（支持音频路由）";
     public string LastFallbackReason => "";
     public string LastError => _stderrTail;
@@ -114,6 +128,11 @@ public sealed class FfmpegRecordingService : IRecordingService
         _activeFilePath = Path.Combine(saveDirectory, $"SnipEasy_recording_{DateTime.Now:yyyyMMdd_HHmmss}.mp4");
         _startedAt = DateTimeOffset.Now;
         _stderrTail = "";
+        lock (_pauseSync)
+        {
+            _isPaused = false;
+            _suspendedThreadIds.Clear();
+        }
 
         var processStart = new ProcessStartInfo
         {
@@ -144,6 +163,51 @@ public sealed class FfmpegRecordingService : IRecordingService
         return _activeFilePath;
     }
 
+    public Task PauseAsync()
+    {
+        return Task.Run(() =>
+        {
+            lock (_pauseSync)
+            {
+                if (_process is null || _process.HasExited)
+                {
+                    throw new InvalidOperationException("当前没有正在进行的录屏。");
+                }
+
+                if (_isPaused)
+                {
+                    return;
+                }
+
+                var suspendedThreadIds = SuspendProcessThreads(_process);
+                if (suspendedThreadIds.Count == 0)
+                {
+                    throw new InvalidOperationException("无法暂停 FFmpeg 录屏进程。");
+                }
+
+                _suspendedThreadIds = suspendedThreadIds;
+                _isPaused = true;
+                _logger.Info($"FFmpeg recording paused ({suspendedThreadIds.Count} threads suspended).");
+            }
+        });
+    }
+
+    public Task ResumeAsync()
+    {
+        return Task.Run(() =>
+        {
+            lock (_pauseSync)
+            {
+                if (_process is null || _process.HasExited)
+                {
+                    throw new InvalidOperationException("当前没有正在进行的录屏。");
+                }
+
+                ResumeProcessThreadsIfPaused();
+            }
+        });
+    }
+
     public async Task<CaptureRecord> StopAsync()
     {
         if (_process is null)
@@ -153,6 +217,11 @@ public sealed class FfmpegRecordingService : IRecordingService
 
         try
         {
+            lock (_pauseSync)
+            {
+                ResumeProcessThreadsIfPaused();
+            }
+
             if (!_process.HasExited)
             {
                 await _process.StandardInput.WriteLineAsync("q").ConfigureAwait(false);
@@ -180,6 +249,11 @@ public sealed class FfmpegRecordingService : IRecordingService
         _process.Dispose();
         _process = null;
         _stderrTask = null;
+        lock (_pauseSync)
+        {
+            _isPaused = false;
+            _suspendedThreadIds.Clear();
+        }
 
         if (exitCode != 0 && !File.Exists(_activeFilePath))
         {
@@ -250,6 +324,11 @@ public sealed class FfmpegRecordingService : IRecordingService
         {
             try
             {
+                lock (_pauseSync)
+                {
+                    ResumeProcessThreadsIfPaused();
+                }
+
                 _process.Kill(entireProcessTree: true);
             }
             catch
@@ -259,6 +338,64 @@ public sealed class FfmpegRecordingService : IRecordingService
         }
 
         _process?.Dispose();
+    }
+
+    private static HashSet<uint> SuspendProcessThreads(Process process)
+    {
+        var suspendedThreadIds = new HashSet<uint>();
+        foreach (ProcessThread thread in process.Threads)
+        {
+            var threadId = unchecked((uint)thread.Id);
+            var handle = NativeMethods.OpenThread(NativeMethods.ThreadSuspendResume, false, threadId);
+            if (handle == IntPtr.Zero)
+            {
+                continue;
+            }
+
+            try
+            {
+                if (NativeMethods.SuspendThread(handle) != uint.MaxValue)
+                {
+                    suspendedThreadIds.Add(threadId);
+                }
+            }
+            finally
+            {
+                _ = NativeMethods.CloseHandle(handle);
+            }
+        }
+
+        return suspendedThreadIds;
+    }
+
+    private void ResumeProcessThreadsIfPaused()
+    {
+        if (!_isPaused)
+        {
+            return;
+        }
+
+        foreach (var threadId in _suspendedThreadIds)
+        {
+            var handle = NativeMethods.OpenThread(NativeMethods.ThreadSuspendResume, false, threadId);
+            if (handle == IntPtr.Zero)
+            {
+                continue;
+            }
+
+            try
+            {
+                _ = NativeMethods.ResumeThread(handle);
+            }
+            finally
+            {
+                _ = NativeMethods.CloseHandle(handle);
+            }
+        }
+
+        _suspendedThreadIds.Clear();
+        _isPaused = false;
+        _logger.Info("FFmpeg recording resumed.");
     }
 
     internal static List<string> BuildArguments(AppSettings settings, string outputPath)
@@ -295,24 +432,32 @@ public sealed class FfmpegRecordingService : IRecordingService
         AddAudioInput(settings.RecordingCaptureSystemAudio, settings.RecordingSystemAudioDevice, arguments, ref audioInputCount);
         AddAudioInput(settings.RecordingCaptureMicrophone, settings.RecordingMicrophoneDevice, arguments, ref audioInputCount);
 
+        var videoTimestampFilter = $"setpts=N/({frameRate}*TB)";
         if (audioInputCount == 2)
         {
             arguments.Add("-filter_complex");
-            arguments.Add("[1:a][2:a]amix=inputs=2:duration=longest:normalize=0[aout]");
+            arguments.Add(
+                $"[0:v]{videoTimestampFilter}[vout];" +
+                "[1:a][2:a]amix=inputs=2:duration=longest:normalize=0[amixed];" +
+                "[amixed]asetpts=N/SR/TB[aout]");
             arguments.Add("-map");
-            arguments.Add("0:v");
+            arguments.Add("[vout]");
             arguments.Add("-map");
             arguments.Add("[aout]");
         }
         else if (audioInputCount == 1)
         {
+            arguments.Add("-filter_complex");
+            arguments.Add($"[0:v]{videoTimestampFilter}[vout];[1:a]asetpts=N/SR/TB[aout]");
             arguments.Add("-map");
-            arguments.Add("0:v");
+            arguments.Add("[vout]");
             arguments.Add("-map");
-            arguments.Add("1:a");
+            arguments.Add("[aout]");
         }
         else
         {
+            arguments.Add("-vf");
+            arguments.Add(videoTimestampFilter);
             arguments.Add("-an");
         }
 

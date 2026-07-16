@@ -288,7 +288,7 @@
             <!-- 提示文字 -->
             <TextBlock x:Name="ActionHintText"
                        Grid.Column="4"
-                       Text="F2 停止"
+                       Text="F2 完成"
                        FontSize="12"
                        Foreground="#94A3B8"
                        VerticalAlignment="Center"
@@ -298,16 +298,35 @@
             <StackPanel Grid.Column="5"
                         Orientation="Horizontal"
                         VerticalAlignment="Center">
+                <Button x:Name="PauseButton"
+                        Style="{StaticResource RecordingActionButton}"
+                        Background="#F1F5F9"
+                        Foreground="#334155"
+                        Click="PauseButton_Click"
+                        ToolTip="暂停录屏"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock x:Name="PauseButtonIcon"
+                                   Text="&#xE769;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="12"
+                                   Margin="0,0,7,0" />
+                        <TextBlock x:Name="PauseButtonLabel"
+                                   Text="暂停"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button x:Name="StopButton"
                         Style="{StaticResource RecordingActionButton}"
                         Background="#EF4444"
                         Foreground="#FFFFFF"
                         Click="StopButton_Click"
-                        ToolTip="停止录屏">
+                        ToolTip="完成录屏">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Border Width="8" Height="8" Background="White" CornerRadius="4" Margin="0,0,8,0" />
                         <TextBlock x:Name="StopButtonLabel"
-                                   Text="停止"
+                                   Text="完成录制"
                                    Foreground="#FFFFFF"
                                    VerticalAlignment="Center" />
                     </StackPanel>

@@ -11,11 +11,14 @@ namespace SnipEasy.App.Services;
 public sealed class LocalAviRecordingService : IRecordingService
 {
     private CancellationTokenSource? _stopSignal;
+    private ManualResetEventSlim? _pauseGate;
     private Task? _recordingTask;
     private string _activeFilePath = "";
     private DateTimeOffset _startedAt;
+    private volatile bool _isPaused;
 
     public bool IsRecording => _recordingTask is { IsCompleted: false };
+    public bool IsPaused => _isPaused && IsRecording;
     public string EngineName => "内置 AVI 兜底后端（无音频）";
     public string LastFallbackReason => "";
 
@@ -45,16 +48,46 @@ public sealed class LocalAviRecordingService : IRecordingService
         _activeFilePath = Path.Combine(saveDirectory, $"SnipEasy_recording_{DateTime.Now:yyyyMMdd_HHmmss}.avi");
         _startedAt = DateTimeOffset.Now;
         _stopSignal = new CancellationTokenSource();
+        _pauseGate = new ManualResetEventSlim(initialState: true);
+        _isPaused = false;
         var performanceProfile = RecordingPerformanceProfiles.Resolve(settings.RecordingPerformanceMode);
         var frameRate = Math.Clamp(settings.RecordingFrameRate, 1, performanceProfile.LocalAviFrameRateLimit);
         var quality = Math.Clamp(100 - settings.RecordingCrf * 2, 35, 75);
 
-        _recordingTask = Task.Run(() => RecordLoop(_activeFilePath, frameRate, quality, _stopSignal.Token));
+        _recordingTask = Task.Run(() => RecordLoop(_activeFilePath, frameRate, quality, _pauseGate, _stopSignal.Token));
         ObserveRecordingTaskFault(_recordingTask);
 
         // Recording starts in a background task; return the output path immediately.
         // The interface requires Task<string> for compatibility with FfmpegRecordingService.
         return Task.FromResult(_activeFilePath);
+    }
+
+    public Task PauseAsync()
+    {
+        if (!IsRecording || _pauseGate is null)
+        {
+            throw new InvalidOperationException("当前没有正在进行的录屏。");
+        }
+
+        if (!_isPaused)
+        {
+            _isPaused = true;
+            _pauseGate.Reset();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task ResumeAsync()
+    {
+        if (!IsRecording || _pauseGate is null)
+        {
+            throw new InvalidOperationException("当前没有正在进行的录屏。");
+        }
+
+        _isPaused = false;
+        _pauseGate.Set();
+        return Task.CompletedTask;
     }
 
     public async Task<CaptureRecord> StopAsync()
@@ -65,11 +98,15 @@ public sealed class LocalAviRecordingService : IRecordingService
         }
 
         _stopSignal.Cancel();
+        _pauseGate?.Set();
         await _recordingTask.ConfigureAwait(false);
 
         _recordingTask = null;
         _stopSignal.Dispose();
         _stopSignal = null;
+        _pauseGate?.Dispose();
+        _pauseGate = null;
+        _isPaused = false;
 
         if (!File.Exists(_activeFilePath) || new FileInfo(_activeFilePath).Length == 0)
         {
@@ -97,6 +134,7 @@ public sealed class LocalAviRecordingService : IRecordingService
         if (_stopSignal is not null)
         {
             _stopSignal.Cancel();
+            _pauseGate?.Set();
             try
             {
                 _recordingTask?.Wait(TimeSpan.FromSeconds(3));
@@ -119,6 +157,9 @@ public sealed class LocalAviRecordingService : IRecordingService
             }
 
             _stopSignal.Dispose();
+            _pauseGate?.Dispose();
+            _pauseGate = null;
+            _isPaused = false;
         }
     }
 
@@ -134,7 +175,12 @@ public sealed class LocalAviRecordingService : IRecordingService
             TaskScheduler.Default);
     }
 
-    private static void RecordLoop(string outputPath, int frameRate, int quality, CancellationToken token)
+    private static void RecordLoop(
+        string outputPath,
+        int frameRate,
+        int quality,
+        ManualResetEventSlim pauseGate,
+        CancellationToken token)
     {
         var screen = Forms.SystemInformation.VirtualScreen;
         using var avi = new AviWriter(outputPath, screen.Width, screen.Height, frameRate);
@@ -146,6 +192,16 @@ public sealed class LocalAviRecordingService : IRecordingService
 
         while (!token.IsCancellationRequested)
         {
+            if (!pauseGate.IsSet)
+            {
+                pauseGate.Wait();
+                nextFrameAt = DateTime.UtcNow;
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+
             graphics.CopyFromScreen(screen.Left, screen.Top, 0, 0, screen.Size, CopyPixelOperation.SourceCopy);
 
             avi.AddFrame(EncodeJpeg(bitmap, quality));

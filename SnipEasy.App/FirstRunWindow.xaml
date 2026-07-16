@@ -52,7 +52,7 @@
                             </Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="屏幕录制" FontSize="16" FontWeight="SemiBold" Foreground="#047857" />
-                                <TextBlock Text="按 F2 开始录屏，再按 F2 停止；停止后选择保存或取消。支持录制电脑声音和麦克风。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="按 F2 开始录屏；浮窗可暂停、继续或完成录制，完成后选择保存或取消。支持录制电脑声音和麦克风。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Grid>
                     </Border>

@@ -200,9 +200,9 @@
 
             <Rectangle x:Name="WindowHighlight"
                        Panel.ZIndex="16"
-                       Stroke="#38BDF8"
+                       Stroke="#F8FAFC"
                        StrokeThickness="2"
-                       Fill="#1838BDF8"
+                       Fill="{x:Null}"
                        IsHitTestVisible="False"
                        Visibility="Collapsed" />
 

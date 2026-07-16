@@ -7,6 +7,30 @@ public class FfmpegRecordingServiceTests
 {
     [Fact]
     [Trait("Category", "Unit")]
+    public async Task PauseAsync_WhenNotRecording_Throws()
+    {
+        var logPath = Path.Combine(Path.GetTempPath(), "SnipEasyTests", Guid.NewGuid().ToString("N"), "test.log");
+        using var service = new FfmpegRecordingService(new AppLogger(logPath));
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => service.PauseAsync());
+
+        Assert.Contains("没有正在进行", error.Message);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ResumeAsync_WhenNotRecording_Throws()
+    {
+        var logPath = Path.Combine(Path.GetTempPath(), "SnipEasyTests", Guid.NewGuid().ToString("N"), "test.log");
+        using var service = new FfmpegRecordingService(new AppLogger(logPath));
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ResumeAsync());
+
+        Assert.Contains("没有正在进行", error.Message);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public void BuildArguments_NoAudio_IncludesAnFlag()
     {
         // Arrange
@@ -22,6 +46,7 @@ public class FfmpegRecordingServiceTests
 
         // Assert
         Assert.Contains("-an", args);
+        Assert.Contains("setpts=N/(12*TB)", args);
         Assert.Contains("libx264", args);
         Assert.Contains("-crf", args);
         Assert.Equal("out.mp4", args[^1]);
@@ -47,7 +72,11 @@ public class FfmpegRecordingServiceTests
         var args = FfmpegRecordingService.BuildArguments(settings, "out.mp4");
 
         // Assert
-        Assert.Contains("[1:a][2:a]amix=inputs=2:duration=longest:normalize=0[aout]", args);
+        Assert.Contains(
+            args,
+            value => value.Contains("[1:a][2:a]amix=inputs=2:duration=longest:normalize=0[amixed]", StringComparison.Ordinal));
+        Assert.Contains(args, value => value.Contains("[amixed]asetpts=N/SR/TB[aout]", StringComparison.Ordinal));
+        Assert.Contains(args, value => value.Contains("[0:v]setpts=N/(12*TB)[vout]", StringComparison.Ordinal));
         Assert.Contains("audio=Stereo Mix", args);
         Assert.Contains("audio=Microphone", args);
     }
@@ -71,6 +100,7 @@ public class FfmpegRecordingServiceTests
 
         // Assert
         Assert.Contains("audio=virtual-audio-capturer", args);
+        Assert.Contains(args, value => value.Contains("[1:a]asetpts=N/SR/TB[aout]", StringComparison.Ordinal));
         Assert.DoesNotContain("-an", args);
     }
 

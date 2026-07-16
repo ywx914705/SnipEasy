@@ -619,6 +619,10 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(() => _recordingStatusWindow?.ShowRecordingState(status));
         };
+        rec.ShowPausedStateRequested += (_, _) =>
+        {
+            Dispatcher.Invoke(() => _recordingStatusWindow?.ShowPausedState());
+        };
         rec.EnsureSettingsAppliedRequested += (_, args) =>
         {
             Dispatcher.Invoke(() => args.IsValid = ApplySettingsFromUi());
@@ -677,6 +681,8 @@ public partial class MainWindow : Window
     {
         window.StopRequested += (_, _) =>
             _ = _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null);
+        window.PauseRequested += (_, _) =>
+            _ = _viewModel.Recording.TogglePauseRecordingCommand.ExecuteAsync(null);
         window.SaveRequested += (_, _) =>
             _ = _viewModel.Recording.SavePendingRecordingCommand.ExecuteAsync(null);
         window.CancelRequested += (_, _) =>
