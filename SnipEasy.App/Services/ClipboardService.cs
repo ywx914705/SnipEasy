@@ -17,6 +17,11 @@ public sealed class ClipboardService
         RetryClipboard(() => System.Windows.Clipboard.SetFileDropList(files));
     }
 
+    public void SetText(string text)
+    {
+        RetryClipboard(() => System.Windows.Clipboard.SetText(text));
+    }
+
     private static void RetryClipboard(Action action)
     {
         Exception? lastError = null;

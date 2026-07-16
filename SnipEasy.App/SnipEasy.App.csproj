@@ -2,11 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationIcon>Assets\SnipEasy.ico</ApplicationIcon>
     <AssemblyName>SnipEasy</AssemblyName>
     <RootNamespace>SnipEasy.App</RootNamespace>
@@ -18,7 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\tools\ffmpeg\**\*" Link="tools\ffmpeg\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\tools\ffmpeg\ffmpeg.exe"
+             Link="tools\ffmpeg\ffmpeg.exe"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Condition="Exists('..\tools\ffmpeg\ffmpeg.exe')" />
+    <Content Include="..\tools\ffmpeg\LICENSE"
+             Link="tools\ffmpeg\LICENSE"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Condition="Exists('..\tools\ffmpeg\LICENSE')" />
   </ItemGroup>
 
   <ItemGroup>

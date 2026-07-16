@@ -33,7 +33,11 @@ public sealed class CrashReportService
         var reportPath = Path.Combine(CrashDirectory, $"crash-{timestamp}.txt");
         var packagePath = Path.Combine(CrashDirectory, $"crash-{timestamp}.zip");
         File.WriteAllText(reportPath, $"Context: {context}{Environment.NewLine}Time: {DateTimeOffset.Now:O}{Environment.NewLine}{exception}");
-        _diagnosticPackageService.Export(packagePath, "", $"Crash context: {context}");
+        _diagnosticPackageService.Export(
+            packagePath,
+            "",
+            $"Crash context: {context}",
+            includeUserData: false);
         File.WriteAllText(LatestMarkerPath, packagePath);
         _logger.Error($"Crash report generated: {packagePath}", exception);
         return packagePath;

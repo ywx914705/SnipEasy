@@ -4,9 +4,11 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using SnipEasy.App.Services;
+using DrawingPoint = System.Drawing.Point;
 using WpfButton = System.Windows.Controls.Button;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
@@ -27,7 +29,8 @@ public partial class RegionCaptureWindow : Window
         None,
         CopyToClipboard,
         Save,
-        Sticker
+        Sticker,
+        ExtractText
     }
 
 
@@ -55,6 +58,7 @@ public partial class RegionCaptureWindow : Window
     private readonly Stack<AnnotationAction> _undoStack = new();
     private readonly bool _initialWatermarkEnabled;
     private readonly string _initialWatermarkText;
+    private readonly WindowSelectionService _windowSelectionService;
     private Rect _selection;
     private WpfPoint _dragStart;
     private WpfPoint _moveStart;
@@ -76,6 +80,9 @@ public partial class RegionCaptureWindow : Window
     private string _activeResizeHandle = "";
     private Rect _selectionResizeCurrentBounds;
     private string _activeSelectionResizeHandle = "";
+    private Rect _highlightedWindowSelection = Rect.Empty;
+    private Rect _mouseDownWindowSelection = Rect.Empty;
+    private bool _manualSelectionStarted;
 
     private bool _mosaicPainting;
     private WriteableBitmap? _mosaicBitmap;
@@ -89,28 +96,21 @@ public partial class RegionCaptureWindow : Window
     private int _mosaicSrcStride;
     private int _mosaicDstStride;
 
-    // Blur painting state
-    private bool _blurPainting;
-    private WriteableBitmap? _blurBitmap;
-    private byte[]? _blurPixels;
-    private byte[]? _blurSrcPixels;
-    private System.Windows.Controls.Image? _blurImage;
-    private double _blurScaleX;
-    private double _blurScaleY;
-    private int _blurBmpW;
-    private int _blurBmpH;
-    private int _blurSrcStride;
-    private int _blurDstStride;
-
     public BitmapSource? AnnotatedImage { get; private set; }
     public CaptureAction RequestedAction { get; private set; }
-    public bool IsWatermarkApplied => false;
+    public bool IsWatermarkApplied =>
+        _initialWatermarkEnabled && !string.IsNullOrWhiteSpace(_initialWatermarkText);
 
-    public RegionCaptureWindow(BitmapSource desktopSnapshot, bool watermarkEnabled, string watermarkText)
+    public RegionCaptureWindow(
+        BitmapSource desktopSnapshot,
+        bool watermarkEnabled,
+        string watermarkText,
+        WindowSelectionService windowSelectionService)
     {
         _desktopSnapshot = desktopSnapshot;
         _initialWatermarkEnabled = watermarkEnabled;
         _initialWatermarkText = watermarkText;
+        _windowSelectionService = windowSelectionService;
         InitializeComponent();
 
         DesktopImage.Source = _desktopSnapshot;
@@ -119,7 +119,6 @@ public partial class RegionCaptureWindow : Window
         Width = SystemParameters.VirtualScreenWidth;
         Height = SystemParameters.VirtualScreenHeight;
 
-        // Watermark controls removed in simplified layout
         SetStrokeColor(_strokeColor);
         SetActiveTool(AnnotationTool.Select);
         UpdateDrawingAttributes();
@@ -164,6 +163,8 @@ public partial class RegionCaptureWindow : Window
 
         _dragMode = DragMode.DrawingSelection;
         _dragStart = position;
+        _mouseDownWindowSelection = _highlightedWindowSelection;
+        _manualSelectionStarted = false;
         OverlayCanvas.CaptureMouse();
         SetSelection(new Rect(_dragStart, _dragStart), refreshImage: false);
         e.Handled = true;
@@ -175,7 +176,12 @@ public partial class RegionCaptureWindow : Window
 
         if (_dragMode == DragMode.DrawingSelection)
         {
-            UpdateSelection(_dragStart, position, refreshImage: false);
+            if ((position - _dragStart).Length >= 4)
+            {
+                _manualSelectionStarted = true;
+                HideWindowHighlight();
+                UpdateSelection(_dragStart, position, refreshImage: false);
+            }
             e.Handled = true;
             return;
         }
@@ -187,7 +193,14 @@ public partial class RegionCaptureWindow : Window
             return;
         }
 
-        OverlayCanvas.Cursor = CaptureEditor.Visibility == Visibility.Visible && _activeTool == AnnotationTool.Select && _selection.Contains(position)
+        if (CaptureEditor.Visibility != Visibility.Visible)
+        {
+            UpdateWindowHighlight(position);
+        }
+
+        OverlayCanvas.Cursor = CaptureEditor.Visibility == Visibility.Visible &&
+                               _activeTool == AnnotationTool.Select &&
+                               _selection.Contains(position)
             ? WpfCursors.SizeAll
             : WpfCursors.Cross;
     }
@@ -206,7 +219,15 @@ public partial class RegionCaptureWindow : Window
 
         if (finishedMode == DragMode.DrawingSelection)
         {
-            UpdateSelection(_dragStart, e.GetPosition(OverlayCanvas), refreshImage: true);
+            if (!_manualSelectionStarted &&
+                CaptureSelectionGeometry.IsValid(_mouseDownWindowSelection))
+            {
+                SetSelection(_mouseDownWindowSelection, refreshImage: true);
+            }
+            else
+            {
+                UpdateSelection(_dragStart, e.GetPosition(OverlayCanvas), refreshImage: true);
+            }
         }
         else if (finishedMode == DragMode.MovingSelection)
         {
@@ -220,7 +241,42 @@ public partial class RegionCaptureWindow : Window
         }
 
         ShowEditor();
+        HideWindowHighlight();
         e.Handled = true;
+    }
+
+    private void UpdateWindowHighlight(WpfPoint overlayPosition)
+    {
+        var screenPoint = PointToScreen(overlayPosition);
+        if (!_windowSelectionService.TryFindWindowAt(
+                new DrawingPoint((int)Math.Round(screenPoint.X), (int)Math.Round(screenPoint.Y)),
+                out var pixelBounds))
+        {
+            HideWindowHighlight();
+            return;
+        }
+
+        var topLeft = PointFromScreen(new WpfPoint(pixelBounds.Left, pixelBounds.Top));
+        var bottomRight = PointFromScreen(new WpfPoint(pixelBounds.Right, pixelBounds.Bottom));
+        var candidate = ClampSelection(new Rect(topLeft, bottomRight));
+        if (!CaptureSelectionGeometry.IsValid(candidate))
+        {
+            HideWindowHighlight();
+            return;
+        }
+
+        _highlightedWindowSelection = candidate;
+        Canvas.SetLeft(WindowHighlight, candidate.Left);
+        Canvas.SetTop(WindowHighlight, candidate.Top);
+        WindowHighlight.Width = candidate.Width;
+        WindowHighlight.Height = candidate.Height;
+        WindowHighlight.Visibility = Visibility.Visible;
+    }
+
+    private void HideWindowHighlight()
+    {
+        _highlightedWindowSelection = Rect.Empty;
+        WindowHighlight.Visibility = Visibility.Collapsed;
     }
 
     private void Window_KeyDown(object sender, WpfKeyEventArgs e)
@@ -275,6 +331,7 @@ public partial class RegionCaptureWindow : Window
     private void BlackColor_Click(object sender, RoutedEventArgs e) => SetStrokeColor(WpfColor.FromRgb(17, 24, 39));
     private void Copy_Click(object sender, RoutedEventArgs e) => Complete(CaptureAction.CopyToClipboard);
     private void Sticker_Click(object sender, RoutedEventArgs e) => Complete(CaptureAction.Sticker);
+    private void Ocr_Click(object sender, RoutedEventArgs e) => Complete(CaptureAction.ExtractText);
     private void Save_Click(object sender, RoutedEventArgs e) => Complete(CaptureAction.Save);
 
     private void Delete_Click(object sender, RoutedEventArgs e)
@@ -306,9 +363,6 @@ public partial class RegionCaptureWindow : Window
         _strokeThickness = e.NewValue;
         UpdateDrawingAttributes();
     }
-
-    private void Watermark_Changed(object sender, RoutedEventArgs e) { }
-    private void WatermarkTextBox_TextChanged(object sender, TextChangedEventArgs e) { }
 
     private void AnnotationCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
     {
@@ -432,6 +486,11 @@ public partial class RegionCaptureWindow : Window
             }
             else
             {
+                if (_activeTool == AnnotationTool.Blur)
+                {
+                    ApplyBlurFill(_draftShape);
+                }
+
                 AttachMovableElement(_draftShape);
                 SelectElement(_draftShape);
                 _undoStack.Push(AnnotationAction.AddElement(_draftShape));
@@ -737,9 +796,12 @@ public partial class RegionCaptureWindow : Window
             SetToolButtonText(TextToolButton, TextToolText, "文");
             SetToolButtonText(ArrowToolButton, ArrowToolText, "箭");
             SetToolButtonText(MosaicToolButton, MosaicToolText, "马");
+            SetToolButtonText(HighlightToolButton, HighlightToolText, "亮");
+            SetToolButtonText(BlurToolButton, BlurToolText, "糊");
 
             foreach (var btn in new[] { SelectToolButton, PenToolButton, RectangleToolButton,
-                                        EllipseToolButton, TextToolButton, ArrowToolButton, MosaicToolButton })
+                                        EllipseToolButton, TextToolButton, ArrowToolButton, MosaicToolButton,
+                                        HighlightToolButton, BlurToolButton })
             {
                 btn.MinWidth = 26;
                 btn.Margin = new Thickness(1);
@@ -766,11 +828,14 @@ public partial class RegionCaptureWindow : Window
             SetToolButtonText(TextToolButton, TextToolText, "文字");
             SetToolButtonText(ArrowToolButton, ArrowToolText, "箭头");
             SetToolButtonText(MosaicToolButton, MosaicToolText, "马赛克");
+            SetToolButtonText(HighlightToolButton, HighlightToolText, "高亮");
+            SetToolButtonText(BlurToolButton, BlurToolText, "模糊");
 
             double minW = compact ? 42 : 70;
             var pad = compact ? new Thickness(8, 6, 8, 6) : new Thickness(10, 6, 10, 6);
             foreach (var btn in new[] { SelectToolButton, PenToolButton, RectangleToolButton,
-                                        EllipseToolButton, TextToolButton, ArrowToolButton, MosaicToolButton })
+                                        EllipseToolButton, TextToolButton, ArrowToolButton, MosaicToolButton,
+                                        HighlightToolButton, BlurToolButton })
             {
                 btn.MinWidth = minW;
                 btn.Margin = new Thickness(3);
@@ -819,6 +884,8 @@ public partial class RegionCaptureWindow : Window
         SetToolButtonState(TextToolButton, tool == AnnotationTool.Text);
         SetToolButtonState(ArrowToolButton, tool == AnnotationTool.Arrow);
         SetToolButtonState(MosaicToolButton, tool == AnnotationTool.Mosaic);
+        SetToolButtonState(HighlightToolButton, tool == AnnotationTool.Highlight);
+        SetToolButtonState(BlurToolButton, tool == AnnotationTool.Blur);
     }
 
     private void SetStrokeColor(WpfColor color)
@@ -924,19 +991,55 @@ public partial class RegionCaptureWindow : Window
     {
         ClearSelectedElement();
 
-        // For now, use a simple blur effect placeholder
-        // In a real implementation, this would apply Gaussian blur to the underlying image
         var blur = new System.Windows.Shapes.Rectangle
         {
-            Fill = new SolidColorBrush(WpfColor.FromArgb(128, 200, 200, 200)),
-            Stroke = new SolidColorBrush(WpfColor.FromArgb(60, 128, 128, 128)),
-            StrokeThickness = 1
+            Fill = WpfBrushes.Transparent,
+            Stroke = WpfBrushes.Transparent,
+            StrokeThickness = 0
         };
 
         AnnotationCanvas.Children.Add(blur);
         _draftShape = blur;
         _shapeStart = canvasPos;
         AnnotationCanvas.CaptureMouse();
+    }
+
+    private void ApplyBlurFill(Shape shape)
+    {
+        if (SelectedImage.Source is not ImageSource imageSource)
+        {
+            return;
+        }
+
+        var left = InkCanvas.GetLeft(shape);
+        var top = InkCanvas.GetTop(shape);
+        if (double.IsNaN(left))
+        {
+            left = 0;
+        }
+
+        if (double.IsNaN(top))
+        {
+            top = 0;
+        }
+
+        var scaleX = imageSource.Width / Math.Max(1, CaptureSurface.ActualWidth);
+        var scaleY = imageSource.Height / Math.Max(1, CaptureSurface.ActualHeight);
+        shape.Fill = new ImageBrush(imageSource)
+        {
+            Stretch = Stretch.Fill,
+            ViewboxUnits = BrushMappingMode.Absolute,
+            Viewbox = new Rect(
+                left * scaleX,
+                top * scaleY,
+                Math.Max(1, shape.Width * scaleX),
+                Math.Max(1, shape.Height * scaleY))
+        };
+        shape.Effect = new BlurEffect
+        {
+            Radius = 14,
+            RenderingBias = RenderingBias.Quality
+        };
     }
 
     private void UpdateDraftShape(WpfPoint current)
@@ -1155,6 +1258,13 @@ public partial class RegionCaptureWindow : Window
     {
         const int brushRadius = 18;
         const int block = 10;
+        var sourcePixels = _mosaicSrcPixels;
+        var destinationPixels = _mosaicPixels;
+        var mosaicBitmap = _mosaicBitmap;
+        if (sourcePixels is null || destinationPixels is null || mosaicBitmap is null)
+        {
+            return;
+        }
 
         var cx = (int)(canvasPos.X * _mosaicScaleX);
         var cy = (int)(canvasPos.Y * _mosaicScaleY);
@@ -1178,9 +1288,9 @@ public partial class RegionCaptureWindow : Window
                         var srcX = Math.Clamp(bx + dx, 0, srcW - 1);
                         var srcY = Math.Clamp(by + dy, 0, srcH - 1);
                         var off = (srcY * srcW + srcX) * 4;
-                        b += _mosaicSrcPixels[off];
-                        g += _mosaicSrcPixels[off + 1];
-                        r += _mosaicSrcPixels[off + 2];
+                        b += sourcePixels[off];
+                        g += sourcePixels[off + 1];
+                        r += sourcePixels[off + 2];
                         cnt++;
                     }
                 }
@@ -1197,12 +1307,12 @@ public partial class RegionCaptureWindow : Window
                     for (var py = 0; py < bh; py++)
                     {
                         var off = ((by + py) * _mosaicDstStride + (bx + px) * 4);
-                        if (off >= 0 && off + 3 < _mosaicPixels.Length)
+                        if (off >= 0 && off + 3 < destinationPixels.Length)
                         {
-                            _mosaicPixels[off] = avgB;
-                            _mosaicPixels[off + 1] = avgG;
-                            _mosaicPixels[off + 2] = avgR;
-                            _mosaicPixels[off + 3] = 255;
+                            destinationPixels[off] = avgB;
+                            destinationPixels[off + 1] = avgG;
+                            destinationPixels[off + 2] = avgR;
+                            destinationPixels[off + 3] = 255;
                         }
                     }
                 }
@@ -1210,11 +1320,15 @@ public partial class RegionCaptureWindow : Window
             }
         }
 
-        if (changed && _mosaicBitmap != null)
+        if (changed)
         {
-            _mosaicBitmap.Lock();
-            _mosaicBitmap.WritePixels(new Int32Rect(0, 0, _mosaicBmpW, _mosaicBmpH), _mosaicPixels, _mosaicDstStride, 0);
-            _mosaicBitmap.Unlock();
+            mosaicBitmap.Lock();
+            mosaicBitmap.WritePixels(
+                new Int32Rect(0, 0, _mosaicBmpW, _mosaicBmpH),
+                destinationPixels,
+                _mosaicDstStride,
+                0);
+            mosaicBitmap.Unlock();
         }
     }
 
@@ -1762,7 +1876,18 @@ public partial class RegionCaptureWindow : Window
         return false;
     }
 
-    private void UpdateWatermarkPreview() { }
+    private void UpdateWatermarkPreview()
+    {
+        if (!IsWatermarkApplied)
+        {
+            WatermarkBadge.Visibility = Visibility.Collapsed;
+            WatermarkPreviewText.Text = string.Empty;
+            return;
+        }
+
+        WatermarkPreviewText.Text = _initialWatermarkText;
+        WatermarkBadge.Visibility = Visibility.Visible;
+    }
 
     private BitmapSource RenderAnnotatedImage()
     {

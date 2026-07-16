@@ -47,6 +47,8 @@ internal static class ServiceCollectionExtensions
         // Capture services
         services.AddSingleton<ScreenCaptureService>();
         services.AddSingleton<ClipboardService>();
+        services.AddSingleton<WindowSelectionService>();
+        services.AddSingleton<OcrService>();
 
         // Recording services
         services.AddSingleton<IRecordingService, RecordingServiceCoordinator>();

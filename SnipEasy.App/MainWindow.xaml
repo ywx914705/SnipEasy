@@ -631,7 +631,9 @@
                         </Button>
 
                         <!-- F3 -->
-                        <Button Style="{StaticResource KeycapButton}"
+                        <Button x:Name="StickerCardButton"
+                                Style="{StaticResource KeycapButton}"
+                                Click="StickerCardButton_Click"
                                 Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
                                 <Border Background="#9333EA"
@@ -659,7 +661,9 @@
                         </Button>
 
                         <!-- F4 -->
-                        <Button Style="{StaticResource KeycapButton}"
+                        <Button x:Name="ColorPickerCardButton"
+                                Style="{StaticResource KeycapButton}"
+                                Click="ColorPickerCardButton_Click"
                                 Margin="8,0,0,0">
                             <StackPanel HorizontalAlignment="Center">
                                 <Border Background="#EA580C"
@@ -1070,6 +1074,15 @@
                     <Border Style="{StaticResource SettingsCard}">
                         <StackPanel>
                             <TextBlock Text="其他设置" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="截图延时" Style="{StaticResource FieldLabel}" />
+                            <ComboBox x:Name="CaptureDelayComboBox"
+                                      Style="{StaticResource ModernComboBox}"
+                                      Margin="0,0,0,10">
+                                <ComboBoxItem Content="立即截图" Tag="0" />
+                                <ComboBoxItem Content="3 秒" Tag="3" />
+                                <ComboBoxItem Content="5 秒" Tag="5" />
+                                <ComboBoxItem Content="10 秒" Tag="10" />
+                            </ComboBox>
                             <CheckBox x:Name="WatermarkCheckBox" Content="截图时添加水印"
                                       Style="{StaticResource ModernCheckBox}" Margin="0,0,0,6" />
                             <TextBox x:Name="WatermarkTextBox" Style="{StaticResource ModernTextBox}"

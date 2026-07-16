@@ -44,7 +44,8 @@ public sealed class RecordingDraftService
             HistoryRetentionDays = settings.HistoryRetentionDays,
             MinimizeToTrayOnClose = settings.MinimizeToTrayOnClose,
             FirstRunCompleted = settings.FirstRunCompleted,
-            StartWithWindows = settings.StartWithWindows
+            StartWithWindows = settings.StartWithWindows,
+            CaptureDelaySeconds = settings.CaptureDelaySeconds
         };
     }
 

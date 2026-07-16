@@ -84,6 +84,20 @@ public class AppSettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public void Load_LegacyDDriveDefault_UsesNewPlatformDefault()
+    {
+        var service = CreateService();
+        var settings = service.Load();
+        settings.ScreenshotDirectory = "";
+        settings.SaveDirectory = @"D:\SnipEasy\Screenshots";
+        service.Save(settings);
+
+        var loaded = service.Load();
+
+        Assert.Equal("", loaded.ScreenshotDirectory);
+    }
+
+    [Fact]
     public void Load_AlreadyMigratedSettings_DoesNotReMigrate()
     {
         var service = CreateService();
@@ -113,6 +127,7 @@ public class AppSettingsServiceTests : IDisposable
         settings.RecordingCrf = 28;
         settings.MinimizeToTrayOnClose = false;
         settings.HistoryRetentionDays = 30;
+        settings.CaptureDelaySeconds = 5;
         service.Save(settings);
 
         var loaded = service.Load();
@@ -123,5 +138,6 @@ public class AppSettingsServiceTests : IDisposable
         Assert.Equal(28, loaded.RecordingCrf);
         Assert.False(loaded.MinimizeToTrayOnClose);
         Assert.Equal(30, loaded.HistoryRetentionDays);
+        Assert.Equal(5, loaded.CaptureDelaySeconds);
     }
 }

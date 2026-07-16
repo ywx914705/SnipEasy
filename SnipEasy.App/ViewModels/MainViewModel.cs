@@ -13,7 +13,6 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly AppPaths _paths;
     private readonly AppLogger _logger;
-    private readonly AppSettingsService _settingsService;
     private readonly AppSettings _settings;
 
     [ObservableProperty]
@@ -25,15 +24,14 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(
         AppPaths paths,
         AppLogger logger,
-        AppSettingsService settingsService,
+        AppSettings settings,
         SettingsViewModel settingsViewModel,
         RecordingViewModel recordingViewModel,
         HistoryViewModel historyViewModel)
     {
         _paths = paths;
         _logger = logger;
-        _settingsService = settingsService;
-        _settings = settingsService.Load();
+        _settings = settings;
 
         Settings = settingsViewModel;
         Recording = recordingViewModel;

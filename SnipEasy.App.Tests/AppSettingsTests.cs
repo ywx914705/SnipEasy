@@ -20,11 +20,12 @@ public class AppSettingsTests
         Assert.Equal(12, settings.RecordingFrameRate);
         Assert.Equal(23, settings.RecordingCrf);
         Assert.True(settings.PreferFfmpegRecording);
-        Assert.True(settings.AllowLocalAviFallback);
+        Assert.False(settings.AllowLocalAviFallback);
         Assert.Equal(90, settings.HistoryRetentionDays);
         Assert.True(settings.MinimizeToTrayOnClose);
         Assert.False(settings.FirstRunCompleted);
         Assert.False(settings.StartWithWindows);
+        Assert.Equal(0, settings.CaptureDelaySeconds);
     }
 
     [Fact]

@@ -79,4 +79,20 @@ public class JsonFileStoreTests : IDisposable
         var content = File.ReadAllText(path);
         Assert.Contains("\"ScreenshotDirectory\": \"test\"", content);
     }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void Save_ExistingFile_ReplacesContentWithoutLeavingTemporaryFiles()
+    {
+        var path = Path.Combine(_scope.Root, "output.json");
+        var store = new JsonFileStore<AppSettings>(path);
+        store.Save(new AppSettings { ScreenshotDirectory = "first" });
+
+        store.Save(new AppSettings { ScreenshotDirectory = "second" });
+
+        var content = File.ReadAllText(path);
+        Assert.Contains("\"ScreenshotDirectory\": \"second\"", content);
+        Assert.False(File.Exists($"{path}.tmp"));
+        Assert.False(File.Exists($"{path}.bak"));
+    }
 }

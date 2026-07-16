@@ -33,7 +33,12 @@ Run from a Windows SDK Developer Command Prompt or provide `signtool.exe` on PAT
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File installer/Publish-SnipEasy.ps1 -SelfContained -CertificatePath path\to\certificate.pfx -CertificatePassword "..."
+
+# Sign the final installer. Prefer setting SNIPEASY_CERT_PASSWORD in the CI secret store.
+powershell -NoProfile -ExecutionPolicy Bypass -File installer/Build-SnipEasy-Setup.ps1 -CertificatePath path\to\certificate.pfx
 ```
+
+Never commit `.pfx`, `.p12`, or other private signing credentials to the repository.
 
 ## MSIX/MSI path
 

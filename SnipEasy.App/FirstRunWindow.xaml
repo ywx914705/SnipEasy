@@ -35,7 +35,7 @@
                             </Border>
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="区域截图与批注" FontSize="16" FontWeight="SemiBold" Foreground="#1D4ED8" />
-                                <TextBlock Text="框选区域后直接批注（画笔、矩形、椭圆、文字、箭头、马赛克），然后复制、贴图或保存。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="悬停自动识别窗口，也可自由框选；完成后可批注、复制、贴图、保存或离线识字。" Foreground="#475467" Margin="0,4,0,0" TextWrapping="Wrap" />
                             </StackPanel>
                         </Grid>
                     </Border>

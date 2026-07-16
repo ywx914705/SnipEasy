@@ -153,7 +153,7 @@ public partial class RecordingViewModel : ObservableObject
         {
             await StopRecordingAsync();
         }
-        else if (_hasPendingDecision)
+        else if (HasPendingDecision)
         {
             ShowPendingDecision();
             StatusRefreshRequested?.Invoke(this, "请先保存或取消上一段录屏。");

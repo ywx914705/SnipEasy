@@ -11,6 +11,14 @@ $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $root "SnipEasy.App\SnipEasy.App.csproj"
+[xml]$projectXml = Get-Content -LiteralPath $project
+$targetFramework = @($projectXml.Project.PropertyGroup.TargetFramework) |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    Select-Object -First 1
+if ([string]::IsNullOrWhiteSpace($targetFramework)) {
+    throw "TargetFramework was not found in $project."
+}
+
 $outputRoot = Join-Path $root "dist\publish"
 $publishName = if ([string]::IsNullOrWhiteSpace($Runtime)) { "framework-dependent" } else { $Runtime }
 $output = Join-Path $outputRoot $publishName
@@ -60,7 +68,7 @@ if ($publishExitCode -ne 0) {
 
 $exe = Join-Path $output "SnipEasy.exe"
 if (-not (Test-Path $exe)) {
-    $releaseOutput = Join-Path $root "SnipEasy.App\bin\$Configuration\net9.0-windows"
+    $releaseOutput = Join-Path $root "SnipEasy.App\bin\$Configuration\$targetFramework"
     $releaseExe = Join-Path $releaseOutput "SnipEasy.exe"
     if (-not (Test-Path $releaseExe)) {
         throw "Publish failed and Release output was not found. Run dotnet build SnipEasy.sln -c $Configuration first."
@@ -90,7 +98,11 @@ if (-not [string]::IsNullOrWhiteSpace($CertificatePath)) {
     & signtool.exe @signArgs
 }
 
-$version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
+$rawVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exe).ProductVersion
+$version = ($rawVersion -split '[+-]')[0]
+if ([string]::IsNullOrWhiteSpace($version)) {
+    throw "Unable to determine a valid product version from $rawVersion."
+}
 $manifest = [ordered]@{
     version = $version
     runtime = $publishName

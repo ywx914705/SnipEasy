@@ -62,3 +62,8 @@ Desktop.ini
 *.tmp
 *.bak
 unins000.*
+
+## Signing credentials
+*.pfx
+*.p12
+*.snk

@@ -28,7 +28,11 @@ public sealed class UpdateCheckService
                 return new UpdateCheckResult(false, currentVersion.ToString(), "", "更新清单无效。");
             }
 
-            var latest = Version.Parse(manifest.Version);
+            if (!TryParseVersion(manifest.Version, out var latest))
+            {
+                return new UpdateCheckResult(false, currentVersion.ToString(), "", "更新清单版本号无效。");
+            }
+
             return latest > currentVersion
                 ? new UpdateCheckResult(true, latest.ToString(), manifest.DownloadPath, manifest.Notes)
                 : new UpdateCheckResult(false, latest.ToString(), manifest.DownloadPath, "当前已是最新版本。");
@@ -37,6 +41,18 @@ public sealed class UpdateCheckService
         {
             return new UpdateCheckResult(false, currentVersion.ToString(), "", $"检查更新失败：{ex.Message}");
         }
+    }
+
+    internal static bool TryParseVersion(string value, out Version version)
+    {
+        var normalized = (value ?? string.Empty).Trim();
+        var metadataIndex = normalized.IndexOfAny(['+', '-']);
+        if (metadataIndex > 0)
+        {
+            normalized = normalized[..metadataIndex];
+        }
+
+        return Version.TryParse(normalized, out version!);
     }
 
     private sealed class UpdateManifest

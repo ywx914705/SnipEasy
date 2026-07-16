@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "downloadPath": "SnipEasy-Setup.exe",
-  "notes": "Initial productized beta build."
+  "notes": "Smart window capture, offline OCR, delayed capture, privacy and reliability upgrades."
 }

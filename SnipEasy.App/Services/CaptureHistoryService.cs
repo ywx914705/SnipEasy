@@ -47,9 +47,11 @@ public sealed class CaptureHistoryService
 
     public List<CaptureRecord> Prune(IEnumerable<CaptureRecord> records, int retentionDays)
     {
-        var cutoff = DateTimeOffset.Now.AddDays(-Math.Max(retentionDays, 1));
-        return records
-            .Where(record => record.CreatedAt >= cutoff)
+        var filtered = retentionDays <= 0
+            ? records
+            : records.Where(record => record.CreatedAt >= DateTimeOffset.Now.AddDays(-retentionDays));
+
+        return filtered
             .OrderByDescending(record => record.CreatedAt)
             .Take(MaxRecords)
             .ToList();

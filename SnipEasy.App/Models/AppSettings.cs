@@ -12,7 +12,7 @@ public sealed class AppSettings
     public int RecordingFrameRate { get; set; } = 12;
     public int RecordingCrf { get; set; } = 23;
     public bool PreferFfmpegRecording { get; set; } = true;
-    public bool AllowLocalAviFallback { get; set; } = true;
+    public bool AllowLocalAviFallback { get; set; }
     public string FfmpegPath { get; set; } = "";
     public bool RecordingCaptureSystemAudio { get; set; }
     public string RecordingSystemAudioDevice { get; set; } = "virtual-audio-capturer";
@@ -22,6 +22,7 @@ public sealed class AppSettings
     public bool MinimizeToTrayOnClose { get; set; } = true;
     public bool FirstRunCompleted { get; set; }
     public bool StartWithWindows { get; set; }
+    public int CaptureDelaySeconds { get; set; }
 
     // Hotkey settings
     public HotkeySettings Hotkeys { get; set; } = new();

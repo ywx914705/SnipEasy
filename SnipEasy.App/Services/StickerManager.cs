@@ -115,7 +115,12 @@ public sealed class StickerManager : IDisposable
                     continue;
                 }
 
-                var image = new BitmapImage(new Uri(info.ImagePath));
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = new Uri(info.ImagePath);
+                image.EndInit();
+                image.Freeze();
                 var sticker = CreateSticker(image, new WpfPoint(info.Left, info.Top));
                 sticker.Width = info.Width;
                 sticker.Height = info.Height;

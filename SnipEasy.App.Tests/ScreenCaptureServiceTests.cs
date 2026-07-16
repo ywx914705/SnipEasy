@@ -41,7 +41,8 @@ public class ScreenCaptureServiceTests
         var result = ScreenCaptureService.ResolveScreenshotDirectory(settings);
 
         Assert.False(string.IsNullOrWhiteSpace(result));
-        Assert.Contains("Screenshots", result);
+        Assert.Equal("SnipEasy", Path.GetFileName(result));
+        Assert.Contains("Pictures", result, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

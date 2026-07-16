@@ -17,7 +17,11 @@ public sealed class DiagnosticPackageService
         _logger = logger;
     }
 
-    public void Export(string outputZipPath, string ffmpegPath, string engineStatus)
+    public void Export(
+        string outputZipPath,
+        string ffmpegPath,
+        string engineStatus,
+        bool includeUserData = true)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath) ?? ".");
         var tempRoot = Path.Combine(Path.GetTempPath(), $"SnipEasyDiagnostics_{Guid.NewGuid():N}");
@@ -25,11 +29,17 @@ public sealed class DiagnosticPackageService
 
         try
         {
-            File.WriteAllText(Path.Combine(tempRoot, "diagnostics.txt"), BuildSummary(ffmpegPath, engineStatus), Encoding.UTF8);
+            File.WriteAllText(
+                Path.Combine(tempRoot, "diagnostics.txt"),
+                BuildSummary(ffmpegPath, engineStatus, includeUserData),
+                Encoding.UTF8);
             File.WriteAllText(Path.Combine(tempRoot, "environment.txt"), _environmentDiagnostics.BuildReport(), Encoding.UTF8);
             CopyIfExists(_paths.LogPath, Path.Combine(tempRoot, "snipeasy.log"));
-            CopyIfExists(_paths.SettingsPath, Path.Combine(tempRoot, "settings.json"));
-            CopyIfExists(_paths.HistoryPath, Path.Combine(tempRoot, "history.json"));
+            if (includeUserData)
+            {
+                CopyIfExists(_paths.SettingsPath, Path.Combine(tempRoot, "settings.json"));
+                CopyIfExists(_paths.HistoryPath, Path.Combine(tempRoot, "history.json"));
+            }
 
             if (File.Exists(outputZipPath))
             {
@@ -48,7 +58,7 @@ public sealed class DiagnosticPackageService
         }
     }
 
-    private string BuildSummary(string ffmpegPath, string engineStatus)
+    private string BuildSummary(string ffmpegPath, string engineStatus, bool includeUserData)
     {
         var assembly = Assembly.GetExecutingAssembly().GetName();
         var builder = new StringBuilder();
@@ -56,8 +66,8 @@ public sealed class DiagnosticPackageService
         builder.AppendLine($"App version: {assembly.Version}");
         builder.AppendLine($"OS: {Environment.OSVersion}");
         builder.AppendLine($".NET: {Environment.Version}");
-        builder.AppendLine($"Machine: {Environment.MachineName}");
-        builder.AppendLine($"User: {Environment.UserName}");
+        builder.AppendLine($"Machine: {(includeUserData ? Environment.MachineName : "[redacted]")}");
+        builder.AppendLine($"User: {(includeUserData ? Environment.UserName : "[redacted]")}");
         builder.AppendLine($"Base directory: {AppContext.BaseDirectory}");
         builder.AppendLine($"Data directory: {_paths.DataDirectory}");
         builder.AppendLine($"Settings: {_paths.SettingsPath}");

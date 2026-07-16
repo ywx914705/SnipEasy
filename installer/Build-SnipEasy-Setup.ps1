@@ -1,11 +1,22 @@
 param(
-    [switch]$AllowNoFfmpeg
+    [switch]$AllowNoFfmpeg,
+    [string]$CertificatePath = "",
+    [string]$CertificatePassword = $env:SNIPEASY_CERT_PASSWORD
 )
 
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
-$releaseOutput = Join-Path $root "SnipEasy.App\bin\Release\net9.0-windows"
+$projectPath = Join-Path $root "SnipEasy.App\SnipEasy.App.csproj"
+[xml]$projectXml = Get-Content -LiteralPath $projectPath
+$targetFramework = @($projectXml.Project.PropertyGroup.TargetFramework) |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    Select-Object -First 1
+if ([string]::IsNullOrWhiteSpace($targetFramework)) {
+    throw "TargetFramework was not found in $projectPath."
+}
+
+$releaseOutput = Join-Path $root "SnipEasy.App\bin\Release\$targetFramework"
 $issPath = Join-Path $PSScriptRoot "SnipEasy.iss"
 $setupIcon = Join-Path $root "SnipEasy.App\Assets\SnipEasy.ico"
 $ffmpegSource = Join-Path $root "tools\ffmpeg\ffmpeg.exe"
@@ -78,7 +89,8 @@ if (Test-Path $setupOutput) {
 
 # --- Read version from exe ---
 $exePath = Join-Path $releaseOutput "SnipEasy.exe"
-$version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exePath).ProductVersion
+$rawVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($exePath).ProductVersion
+$version = ($rawVersion -split '[+-]')[0]
 if ([string]::IsNullOrWhiteSpace($version)) {
     $version = "1.0.0"
 }
@@ -112,6 +124,35 @@ if ($LASTEXITCODE -ne 0) {
 # --- Verify output ---
 if (-not (Test-Path $setupOutput)) {
     throw "SnipEasy-Setup.exe was not created."
+}
+
+if (-not [string]::IsNullOrWhiteSpace($CertificatePath)) {
+    if (-not (Test-Path -LiteralPath $CertificatePath)) {
+        throw "Signing certificate was not found: $CertificatePath"
+    }
+
+    $signTool = Get-Command "signtool.exe" -ErrorAction SilentlyContinue
+    if (-not $signTool) {
+        throw "signtool.exe was not found. Install the Windows SDK or use a Developer Command Prompt."
+    }
+
+    $signArgs = @(
+        "sign",
+        "/fd", "SHA256",
+        "/f", $CertificatePath,
+        "/tr", "http://timestamp.digicert.com",
+        "/td", "SHA256"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($CertificatePassword)) {
+        $signArgs += "/p"
+        $signArgs += $CertificatePassword
+    }
+
+    $signArgs += $setupOutput
+    & $signTool.Source @signArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "Installer signing failed with exit code $LASTEXITCODE."
+    }
 }
 
 Get-Item -LiteralPath $setupOutput

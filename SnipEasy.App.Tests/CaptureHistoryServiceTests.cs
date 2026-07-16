@@ -49,6 +49,29 @@ public class CaptureHistoryServiceTests : IDisposable
 
     [Fact]
     [Trait("Category", "Unit")]
+    public void Prune_PermanentRetention_KeepsOldRecords()
+    {
+        var old = new CaptureRecord
+        {
+            Kind = CaptureKind.Screenshot,
+            CreatedAt = DateTimeOffset.Now.AddYears(-5),
+            FilePath = "old.png"
+        };
+        var fresh = new CaptureRecord
+        {
+            Kind = CaptureKind.Screenshot,
+            CreatedAt = DateTimeOffset.Now,
+            FilePath = "fresh.png"
+        };
+
+        var result = _service.Prune([old, fresh], retentionDays: 0);
+
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, item => item.Id == old.Id);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     public void Filter_ByKind_ReturnsMatching()
     {
         // Arrange

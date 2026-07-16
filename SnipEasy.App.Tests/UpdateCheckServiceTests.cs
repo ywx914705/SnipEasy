@@ -11,6 +11,17 @@ public class UpdateCheckServiceTests : IDisposable
         _scope.Dispose();
     }
 
+    [Theory]
+    [InlineData("1.2.3+build.7", "1.2.3")]
+    [InlineData("2.0.0-preview", "2.0.0")]
+    public void TryParseVersion_WithMetadata_ParsesNumericVersion(string value, string expected)
+    {
+        var parsed = UpdateCheckService.TryParseVersion(value, out var version);
+
+        Assert.True(parsed);
+        Assert.Equal(expected, version.ToString());
+    }
+
     [Fact]
     [Trait("Category", "Unit")]
     public void Check_NewerVersionAvailable_ReturnsHasUpdate()

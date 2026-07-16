@@ -29,6 +29,8 @@ public partial class MainWindow : Window
     private readonly DiagnosticPackageService _diagnosticPackageService;
     private readonly StartupService _startupService = new();
     private readonly ScreenCaptureService _screenCaptureService;
+    private readonly WindowSelectionService _windowSelectionService;
+    private readonly OcrService _ocrService;
     private readonly ClipboardService _clipboardService;
     private readonly IRecordingService _recordingService;
     private readonly AppSettings _settings;
@@ -47,8 +49,11 @@ public partial class MainWindow : Window
         AppPaths paths,
         AppLogger logger,
         AppSettingsService settingsService,
+        AppSettings settings,
         DiagnosticPackageService diagnosticPackageService,
         ScreenCaptureService screenCaptureService,
+        WindowSelectionService windowSelectionService,
+        OcrService ocrService,
         ClipboardService clipboardService,
         IRecordingService recordingService,
         MainViewModel viewModel,
@@ -59,11 +64,13 @@ public partial class MainWindow : Window
         _settingsService = settingsService;
         _diagnosticPackageService = diagnosticPackageService;
         _screenCaptureService = screenCaptureService;
+        _windowSelectionService = windowSelectionService;
+        _ocrService = ocrService;
         _clipboardService = clipboardService;
         _recordingService = recordingService;
         _viewModel = viewModel;
         _stickerManager = stickerManager;
-        _settings = _settingsService.Load();
+        _settings = settings;
         InitializeComponent();
 
         _logger.Info("MainWindow created.");
@@ -142,30 +149,36 @@ public partial class MainWindow : Window
 
     private void RegisterHotkeys()
     {
+        var hotkeyManager = _hotkeyManager;
+        if (hotkeyManager is null)
+        {
+            return;
+        }
+
         var hotkeys = _settings.Hotkeys;
 
         // Register screenshot hotkey
-        if (!_hotkeyManager.RegisterFromString(ScreenshotHotkeyId, hotkeys.Screenshot, "区域截图", () => _ = StartScreenshotWorkflowAsync()))
+        if (!hotkeyManager.RegisterFromString(ScreenshotHotkeyId, hotkeys.Screenshot, "区域截图", () => _ = StartScreenshotWorkflowAsync()))
         {
-            _hotkeyManager.Register(ScreenshotHotkeyId, Key.F1, 0, "F1 区域截图 (默认)", () => _ = StartScreenshotWorkflowAsync());
+            hotkeyManager.Register(ScreenshotHotkeyId, Key.F1, 0, "F1 区域截图 (默认)", () => _ = StartScreenshotWorkflowAsync());
         }
 
         // Register recording hotkey
-        if (!_hotkeyManager.RegisterFromString(RecordingHotkeyId, hotkeys.Recording, "录屏", () => _ = _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null)))
+        if (!hotkeyManager.RegisterFromString(RecordingHotkeyId, hotkeys.Recording, "录屏", () => _ = _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null)))
         {
-            _hotkeyManager.Register(RecordingHotkeyId, Key.F2, 0, "F2 录屏 (默认)", () => _ = _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null));
+            hotkeyManager.Register(RecordingHotkeyId, Key.F2, 0, "F2 录屏 (默认)", () => _ = _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null));
         }
 
         // Register sticker hotkey
-        if (!_hotkeyManager.RegisterFromString(StickerHotkeyId, hotkeys.Sticker, "贴图", () => _ = StartStickerFromClipboardAsync()))
+        if (!hotkeyManager.RegisterFromString(StickerHotkeyId, hotkeys.Sticker, "贴图", StartStickerFromClipboard))
         {
-            _hotkeyManager.Register(StickerHotkeyId, Key.F3, 0, "F3 贴图 (默认)", () => _ = StartStickerFromClipboardAsync());
+            hotkeyManager.Register(StickerHotkeyId, Key.F3, 0, "F3 贴图 (默认)", StartStickerFromClipboard);
         }
 
         // Register color picker hotkey
-        if (!_hotkeyManager.RegisterFromString(ColorPickerHotkeyId, hotkeys.ColorPicker, "屏幕取色", () => _ = StartColorPickerAsync()))
+        if (!hotkeyManager.RegisterFromString(ColorPickerHotkeyId, hotkeys.ColorPicker, "屏幕取色", StartColorPicker))
         {
-            _hotkeyManager.Register(ColorPickerHotkeyId, Key.F4, 0, "F4 屏幕取色 (默认)", () => _ = StartColorPickerAsync());
+            hotkeyManager.Register(ColorPickerHotkeyId, Key.F4, 0, "F4 屏幕取色 (默认)", StartColorPicker);
         }
     }
 
@@ -190,6 +203,9 @@ public partial class MainWindow : Window
             OpenSaveDirectory,
             ExitApplication);
 
+        _stickerManager.CleanupOldImages();
+        _stickerManager.RestoreState();
+
         Dispatcher.BeginInvoke(() =>
         {
             ShowPreviousCrashReportIfAny();
@@ -205,6 +221,16 @@ public partial class MainWindow : Window
     private async void RecordingButton_Click(object sender, RoutedEventArgs e)
     {
         await _viewModel.Recording.ToggleRecordingCommand.ExecuteAsync(null);
+    }
+
+    private void StickerCardButton_Click(object sender, RoutedEventArgs e)
+    {
+        StartStickerFromClipboard();
+    }
+
+    private void ColorPickerCardButton_Click(object sender, RoutedEventArgs e)
+    {
+        StartColorPicker();
     }
 
     private void SaveSettings_Click(object sender, RoutedEventArgs e)
@@ -365,7 +391,7 @@ public partial class MainWindow : Window
         OpenSelectedFile();
     }
 
-    private async Task StartStickerFromClipboardAsync()
+    private void StartStickerFromClipboard()
     {
         try
         {
@@ -394,7 +420,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task StartColorPickerAsync()
+    private void StartColorPicker()
     {
         try
         {
@@ -435,25 +461,33 @@ public partial class MainWindow : Window
         CaptureButton.IsEnabled = false;
         _logger.Info("Region screenshot workflow started.");
         RefreshStatus("正在进入截图模式，请框选区域后直接批注、复制或保存。");
+        var restoreMainWindow = IsVisible;
 
         try
         {
-            var sourceWindow = NativeMethods.GetForegroundWindowInfo();
-            var wasVisible = IsVisible;
-
-            if (wasVisible)
+            if (restoreMainWindow)
             {
                 Hide();
-                await Task.Delay(160);
             }
 
+            var delaySeconds = Math.Clamp(_settings.CaptureDelaySeconds, 0, 10);
+            if (delaySeconds > 0)
+            {
+                RefreshStatus($"{delaySeconds} 秒后开始截图，请切换到目标窗口。");
+                _trayService?.ShowTip("延时截图", $"{delaySeconds} 秒后开始截图。");
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+            }
+
+            await Task.Delay(160);
+            var sourceWindow = NativeMethods.GetForegroundWindowInfo();
             var desktopSnapshot = await Task.Run(() => _screenCaptureService.CaptureVirtualDesktop());
             var selector = new RegionCaptureWindow(
                 desktopSnapshot,
                 _settings.EnableWatermark,
-                ScreenCaptureService.ExpandWatermark(_settings.WatermarkTemplate))
+                ScreenCaptureService.ExpandWatermark(_settings.WatermarkTemplate),
+                _windowSelectionService)
             {
-                Owner = wasVisible ? this : null
+                Owner = restoreMainWindow ? this : null
             };
 
             var completed = selector.ShowDialog() == true && selector.AnnotatedImage is not null;
@@ -494,6 +528,21 @@ public partial class MainWindow : Window
                 statusText = $"截图已保存到图片目录：{Path.GetFileName(result.Record.FilePath)}";
                 tipText = $"已保存到：{screenshotDirectory}";
             }
+            else if (selector.RequestedAction == RegionCaptureWindow.CaptureAction.ExtractText)
+            {
+                RefreshStatus("正在本地识别文字...");
+                var recognition = await _ocrService.RecognizeAsync(image);
+                if (!recognition.IsSuccessful)
+                {
+                    RefreshStatus(recognition.Message);
+                    _trayService?.ShowTip("文字识别", recognition.Message);
+                    return;
+                }
+
+                _clipboardService.SetText(recognition.Text);
+                statusText = recognition.Message;
+                tipText = $"已复制 {recognition.Text.Length} 个字符。";
+            }
             else
             {
                 RefreshStatus("已取消截图。");
@@ -521,6 +570,10 @@ public partial class MainWindow : Window
         {
             CaptureButton.IsEnabled = true;
             _captureBusy = false;
+            if (restoreMainWindow && IsLoaded && !IsVisible)
+            {
+                ShowAndActivate();
+            }
         }
     }
 
@@ -669,6 +722,12 @@ public partial class MainWindow : Window
             _settings.StartWithWindows = StartWithWindowsCheckBox.IsChecked == true;
             _settings.MinimizeToTrayOnClose = MinimizeToTrayOnCloseCheckBox.IsChecked == true;
             _settings.HistoryRetentionDays = GetSelectedHistoryRetentionDays();
+            _settings.CaptureDelaySeconds = GetSelectedCaptureDelaySeconds();
+            if (_settings.EnableWatermark && string.IsNullOrWhiteSpace(_settings.WatermarkTemplate))
+            {
+                _settings.WatermarkTemplate = "SnipEasy · {Timestamp}";
+                WatermarkTextBox.Text = _settings.WatermarkTemplate;
+            }
 
             if (!TryReadIntInRange(FrameRateTextBox.Text, 1, 30, "录屏帧率", out var frameRate))
             {
@@ -718,6 +777,7 @@ public partial class MainWindow : Window
         _settings.StartWithWindows = StartWithWindowsCheckBox.IsChecked == true;
         MinimizeToTrayOnCloseCheckBox.IsChecked = _settings.MinimizeToTrayOnClose;
         SelectHistoryRetentionDays(_settings.HistoryRetentionDays);
+        SelectCaptureDelaySeconds(_settings.CaptureDelaySeconds);
         FrameRateTextBox.Text = _settings.RecordingFrameRate.ToString();
         CrfTextBox.Text = _settings.RecordingCrf.ToString();
 
@@ -762,7 +822,7 @@ public partial class MainWindow : Window
 
     private void SelectHistoryRetentionDays(int days)
     {
-        var normalized = days <= 30 ? 30 : days <= 90 ? 90 : days <= 180 ? 180 : 365;
+        var normalized = days <= 0 ? 0 : days <= 30 ? 30 : days <= 90 ? 90 : days <= 180 ? 180 : 365;
         foreach (var item in HistoryRetentionComboBox.Items.OfType<System.Windows.Controls.ComboBoxItem>())
         {
             if (int.TryParse(item.Tag?.ToString(), out var itemDays) && itemDays == normalized)
@@ -773,6 +833,39 @@ public partial class MainWindow : Window
         }
 
         HistoryRetentionComboBox.SelectedIndex = 1;
+    }
+
+    private int GetSelectedCaptureDelaySeconds()
+    {
+        if (CaptureDelayComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+            int.TryParse(item.Tag?.ToString(), out var seconds))
+        {
+            return Math.Clamp(seconds, 0, 10);
+        }
+
+        return 0;
+    }
+
+    private void SelectCaptureDelaySeconds(int seconds)
+    {
+        var normalized = seconds switch
+        {
+            >= 10 => 10,
+            >= 5 => 5,
+            >= 3 => 3,
+            _ => 0
+        };
+
+        foreach (var item in CaptureDelayComboBox.Items.OfType<System.Windows.Controls.ComboBoxItem>())
+        {
+            if (int.TryParse(item.Tag?.ToString(), out var itemSeconds) && itemSeconds == normalized)
+            {
+                CaptureDelayComboBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        CaptureDelayComboBox.SelectedIndex = 0;
     }
 
     private bool TryReadIntInRange(string text, int minimum, int maximum, string label, out int value)
@@ -1371,6 +1464,7 @@ public partial class MainWindow : Window
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _viewModel.Recording.DiscardPendingDraft();
+        _stickerManager.SaveState();
         CloseRecordingStatusWindow();
         _hotkeyManager?.Dispose();
         _trayService?.Dispose();

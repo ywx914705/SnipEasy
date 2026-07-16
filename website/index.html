@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SnipEasy - 轻量截图批注与录屏工具 | Windows 免费下载</title>
-  <meta name="description" content="SnipEasy 是面向 Windows 的轻量截图批注与录屏工具。按 F1 区域截图并批注，F2 录屏，F3 贴图，F4 取色。免费、无广告、无捆绑。">
+  <title>SnipEasy 0.3.0 - 智能窗口截图、离线 OCR 与录屏工具</title>
+  <meta name="description" content="SnipEasy 0.3.0 是面向 Windows 的截图批注与录屏工具，支持智能窗口识别、延时截图、离线 OCR、真实模糊、贴图恢复、系统音频录制。免费、无广告、图片不上传云端。">
   <link rel="icon" href="assets/SnipEasyMark.png" type="image/png">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,7 @@
       <a class="logo" href="#top"><img src="assets/SnipEasyMark.png" alt="SnipEasy" width="28" height="28"><span>SnipEasy</span></a>
       <nav class="nav">
         <a href="#features">功能</a>
+        <a href="#new">0.3.0 更新</a>
         <a href="#workflow">截图</a>
         <a href="#recording">录屏</a>
         <a href="#config">配置</a>
@@ -31,7 +32,7 @@
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单"><span></span><span></span><span></span></button>
     </div>
     <nav class="mobile-nav" id="mobileNav">
-      <a href="#features">功能</a><a href="#workflow">截图</a><a href="#recording">录屏</a><a href="#config">配置</a><a href="#author">关于作者</a><a href="#download">下载</a>
+      <a href="#features">功能</a><a href="#new">0.3.0 更新</a><a href="#workflow">截图</a><a href="#recording">录屏</a><a href="#config">配置</a><a href="https://github.com/ywx914705" target="_blank" rel="noopener">关于作者</a><a href="#download">下载</a>
     </nav>
   </header>
 
@@ -55,14 +56,14 @@
       <div class="hero-bg"><div class="hero-blob hb-1"></div><div class="hero-blob hb-2"></div><div class="hero-blob hb-3"></div></div>
       <div class="hero-inner">
         <div class="hero-text fade-up" style="--d:.1s">
-          <div class="badge"><span class="badge-dot"></span>Windows 桌面捕捉工具</div>
+          <div class="badge"><span class="badge-dot"></span>0.3.0 · Windows 桌面捕捉工具</div>
           <h1><span class="hero-line1">截图、批注、录屏</span><br><em class="gradient-text" id="cyclingText">一次到位</em></h1>
-          <p class="hero-desc">常驻系统托盘，按一个键截图批注、录屏、贴图、取色。不跳窗口、不打断工作流。快捷键全部可自定义。</p>
+          <p class="hero-desc">悬停自动识别窗口，截图后可批注、贴图、保存或离线识字。支持延时截图、录屏与取色，不上传图片，不打断工作流。</p>
           <div class="hero-btns">
             <a class="btn btn-primary btn-glow" href="#features">探索全部功能 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
             <a class="btn btn-outline" href="#download">免费下载</a>
           </div>
-          <div class="hero-note">Windows 10/11 · 约 1.4 MB · 免费 · 无广告</div>
+          <div class="hero-note">Windows 10/11 · 约 33 MB · 免费 · 无广告 · 本地处理</div>
         </div>
         <div class="hero-visual fade-up" style="--d:.3s">
           <div class="mockup">
@@ -93,8 +94,8 @@
               <button class="mt" data-tool="circle">椭圆</button>
               <button class="mt" data-tool="text">文字</button>
               <button class="mt" data-tool="arrow">箭头</button>
-              <button class="mt">画笔</button>
               <button class="mt">马赛克</button>
+              <button class="mt">模糊</button>
               <span class="mt-sep"></span>
               <span class="mc" style="background:#EF4444"></span>
               <span class="mc" style="background:#2563EB"></span>
@@ -102,7 +103,7 @@
               <span class="mc" style="background:#10B981"></span>
             </div>
             <div class="mock-bottom">
-              <span class="mbtn">撤销</span><span class="mbtn">删除</span><span class="mbtn">清空</span><span class="mbtn">贴图</span>
+              <span class="mbtn">撤销</span><span class="mbtn">删除</span><span class="mbtn">贴图</span><span class="mbtn">识字</span>
               <span class="mb-sep"></span>
               <span class="mbtn mb-primary">复制</span><span class="mbtn">保存</span><span class="mbtn">取消</span>
             </div>
@@ -124,11 +125,46 @@
         <div class="stat-div"><span class="stat-dot"></span></div>
         <div class="stat fade-up" style="--d:.15s"><span class="stat-n" data-target="4">0</span><span class="stat-l">个快捷键覆盖</span></div>
         <div class="stat-div"><span class="stat-dot"></span></div>
-        <div class="stat fade-up" style="--d:.2s"><span class="stat-n" data-target="5">0</span><span class="stat-l">种颜色可选</span></div>
+        <div class="stat fade-up" style="--d:.2s"><span class="stat-n" data-target="112">0</span><span class="stat-l">项自动化测试</span></div>
         <div class="stat-div"><span class="stat-dot"></span></div>
-        <div class="stat fade-up" style="--d:.25s"><span class="stat-n" data-target="1.4">0</span><span class="stat-u">MB</span><span class="stat-l">安装包大小</span></div>
+        <div class="stat fade-up" style="--d:.25s"><span class="stat-n" data-target="33">0</span><span class="stat-u">MB</span><span class="stat-l">安装包大小</span></div>
         <div class="stat-div"><span class="stat-dot"></span></div>
         <div class="stat fade-up" style="--d:.3s"><span class="stat-n" data-target="0">0</span><span class="stat-l">广告与捆绑</span></div>
+      </div>
+    </section>
+
+    <!-- ===== 0.3.0 RELEASE ===== -->
+    <section id="new" class="sec release-sec">
+      <div class="sec-head fade-up">
+        <span class="sec-tag">SnipEasy 0.3.0</span>
+        <h2>更聪明地截图，更安心地处理内容</h2>
+        <p>这次更新聚焦最常用的截图动作，并把关键链路升级到更可靠的生产级实现。</p>
+      </div>
+      <div class="release-grid">
+        <article class="release-card fade-up" style="--d:.08s">
+          <span class="release-index">01</span>
+          <div class="release-icon ri-blue">▣</div>
+          <h3>智能窗口截图</h3>
+          <p>移动鼠标即可高亮识别窗口，单击直接选中；需要自定义区域时继续拖动框选即可。</p>
+          <div class="release-tags"><span>窗口识别</span><span>多显示器</span><span>Per-Monitor DPI</span></div>
+        </article>
+        <article class="release-card fade-up" style="--d:.16s">
+          <span class="release-index">02</span>
+          <div class="release-icon ri-violet">文</div>
+          <h3>本地 OCR 识字</h3>
+          <p>截图后点击“识字”，调用 Windows 本地语言能力提取文字，并直接复制到剪贴板。</p>
+          <div class="release-tags"><span>离线识别</span><span>无需上传</span><span>一键复制</span></div>
+        </article>
+        <article class="release-card fade-up" style="--d:.24s">
+          <span class="release-index">03</span>
+          <div class="release-icon ri-amber">3s</div>
+          <h3>延时截图与真实模糊</h3>
+          <p>支持立即、3、5、10 秒延时截图；模糊工具现在会对内容应用真实模糊效果。</p>
+          <div class="release-tags"><span>延时截图</span><span>隐私遮挡</span><span>水印修复</span></div>
+        </article>
+      </div>
+      <div class="release-note fade-up" style="--d:.3s">
+        <strong>隐私优先：</strong>截图、OCR、历史与贴图数据都保存在本机；崩溃诊断包默认不包含设置、历史、用户名和机器名。
       </div>
     </section>
 
@@ -141,7 +177,7 @@
           <div class="feat-icon fi-blue"><div class="feat-ring"></div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
           <div class="feat-key">F1</div>
           <h3>区域截图</h3>
-          <p>框选任意区域，即刻进入批注浮层。9 种标注工具，一键复制或保存。</p>
+          <p>悬停识别窗口或自由框选，进入 9 种工具批注浮层，并可复制、保存、贴图或识字。</p>
           <div class="feat-pulse"></div>
         </article>
         <article class="feat-card" data-feat="1">
@@ -171,11 +207,11 @@
 
     <!-- ===== WORKFLOW ===== -->
     <section id="workflow" class="sec workflow-sec">
-      <div class="sec-head fade-up"><span class="sec-tag">截图批注</span><h2>按 F1，框选，批注，完成</h2><p>整个过程在同一个浮层里完成，不弹窗、不跳转。</p></div>
+      <div class="sec-head fade-up"><span class="sec-tag">截图批注</span><h2>按 F1，选窗口，批注，完成</h2><p>智能窗口识别与自由框选共用同一个浮层，不弹窗、不跳转。</p></div>
       <div class="wf-steps">
         <div class="wf-step fade-up" style="--d:.1s">
           <div class="wf-num"><span>1</span><div class="wf-num-ring"></div></div>
-          <div class="wf-body"><h3>框选区域</h3><p>按 F1 后屏幕变暗，拖拽鼠标框选截图区域。支持跨显示器虚拟桌面。</p></div>
+          <div class="wf-body"><h3>选择窗口或区域</h3><p>悬停自动高亮窗口，单击选中；也可拖动自由框选，并支持 0/3/5/10 秒延时。</p></div>
           <div class="wf-vis"><div class="wf-screen"><div class="wf-sel"></div></div></div>
         </div>
         <div class="wf-connector"><svg class="wf-arrow-svg" width="32" height="40" viewBox="0 0 32 40"><path class="wf-arrow-path" d="M16 2 L16 34 M8 26 L16 34 L24 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
@@ -187,8 +223,8 @@
         <div class="wf-connector"><svg class="wf-arrow-svg" width="32" height="40" viewBox="0 0 32 40"><path class="wf-arrow-path" d="M16 2 L16 34 M8 26 L16 34 L24 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
         <div class="wf-step fade-up" style="--d:.4s">
           <div class="wf-num"><span>3</span><div class="wf-num-ring"></div></div>
-          <div class="wf-body"><h3>复制或保存</h3><p>复制到剪贴板、保存到本地、贴图到屏幕。三种输出方式一键完成。</p></div>
-          <div class="wf-vis"><div class="wf-btns"><span class="wb blue">复制</span><span class="wb green">保存</span><span class="wb violet">贴图</span></div></div>
+          <div class="wf-body"><h3>输出或识字</h3><p>复制到剪贴板、保存到本地、贴图到屏幕，或离线识别文字并复制。</p></div>
+          <div class="wf-vis"><div class="wf-btns"><span class="wb blue">复制</span><span class="wb green">识字</span><span class="wb violet">贴图</span></div></div>
         </div>
       </div>
     </section>
@@ -221,13 +257,13 @@
       <div class="sec-head fade-up"><span class="sec-tag">屏幕录制</span><h2>三种模式，按需选择</h2><p>FFmpeg 驱动，支持音频录制。停止后先确认再保存。</p></div>
       <div class="ani-line fade-up" style="--d:.1s"></div>
       <div class="rec-grid">
-        <div class="rec-card"><div class="rc-head smooth"><span class="rc-tag">Smooth</span><h3>流畅优先</h3></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">8 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">30</span></div><div class="rs"><span class="rl">码率</span><span class="rv">2500k</span></div><div class="rs"><span class="rl">预设</span><span class="rv">ultrafast</span></div></div><p>低帧率低占用，适合长时间录制和普通电脑。</p></div>
-        <div class="rec-card featured"><div class="rc-head balanced"><span class="rc-tag">Balanced</span><h3>均衡</h3><span class="rc-rec">推荐</span></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">12 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">26</span></div><div class="rs"><span class="rl">码率</span><span class="rv">4500k</span></div><div class="rs"><span class="rl">预设</span><span class="rv">veryfast</span></div></div><p>兼顾清晰度和流畅度，适合教程和日常演示。</p></div>
-        <div class="rec-card"><div class="rc-head quality"><span class="rc-tag">Quality</span><h3>清晰优先</h3></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">24 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">22</span></div><div class="rs"><span class="rl">码率</span><span class="rv">8000k</span></div><div class="rs"><span class="rl">预设</span><span class="rv">faster</span></div></div><p>高清顺滑，适合配置较好的电脑和短时演示。</p></div>
+        <div class="rec-card"><div class="rc-head smooth"><span class="rc-tag">Smooth</span><h3>流畅优先</h3></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">8 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">30</span></div><div class="rs"><span class="rl">用途</span><span class="rv">长时间</span></div><div class="rs"><span class="rl">预设</span><span class="rv">ultrafast</span></div></div><p>低帧率低占用，适合长时间录制和普通电脑。</p></div>
+        <div class="rec-card featured"><div class="rc-head balanced"><span class="rc-tag">Balanced</span><h3>均衡</h3><span class="rc-rec">推荐</span></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">12 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">26</span></div><div class="rs"><span class="rl">用途</span><span class="rv">日常演示</span></div><div class="rs"><span class="rl">预设</span><span class="rv">veryfast</span></div></div><p>兼顾清晰度和流畅度，适合教程和日常演示。</p></div>
+        <div class="rec-card"><div class="rc-head quality"><span class="rc-tag">Quality</span><h3>清晰优先</h3></div><div class="rc-specs"><div class="rs"><span class="rl">帧率</span><span class="rv">24 fps</span></div><div class="rs"><span class="rl">CRF</span><span class="rv">22</span></div><div class="rs"><span class="rl">用途</span><span class="rv">高清短片</span></div><div class="rs"><span class="rl">预设</span><span class="rv">faster</span></div></div><p>高清顺滑，适合配置较好的电脑和短时演示。</p></div>
       </div>
       <div class="rec-extras fade-up" style="--d:.2s">
         <div class="re-item"><div class="rei-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div><div><h4>系统声音 + 麦克风</h4><p>同时录制系统音频和麦克风输入，自由选择设备。</p></div></div>
-        <div class="re-item"><div class="rei-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div><h4>FFmpeg MP4 输出</h4><p>优先 FFmpeg 输出 MP4，也支持自动回退 AVI。</p></div></div>
+        <div class="re-item"><div class="rei-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div><h4>FFmpeg MP4 输出</h4><p>优先输出 H.264 MP4；需要时可手动开启 AVI 兼容回退。</p></div></div>
         <div class="re-item"><div class="rei-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div><h4>参数可调</h4><p>FPS（1-30）、CRF（18-35）均可手动调整。</p></div></div>
       </div>
     </section>
@@ -248,9 +284,9 @@
     <section class="sec smart-sec">
       <div class="sec-head fade-up"><span class="sec-tag">贴心细节</span><h2>小功能，大便利</h2></div>
       <div class="smart-grid">
-        <div class="smart-card"><span class="sc-num">01</span><h4>历史记录管理</h4><p>搜索、按类型筛选、CSV 导出。保留天数可调，最多 1000 条。</p></div>
-        <div class="smart-card"><span class="sc-num">02</span><h4>虚拟桌面截图</h4><p>跨显示器虚拟桌面截图，多屏工作区一个框选搞定。</p></div>
-        <div class="smart-card"><span class="sc-num">03</span><h4>剪贴板优先</h4><p>截图后一键复制到剪贴板，直接粘贴到微信、邮件、文档。</p></div>
+        <div class="smart-card"><span class="sc-num">01</span><h4>历史记录管理</h4><p>搜索、按类型筛选、CSV 导出，支持 30-365 天或永久保留。</p></div>
+        <div class="smart-card"><span class="sc-num">02</span><h4>智能窗口 + 多显示器</h4><p>自动识别窗口边界，也支持跨显示器虚拟桌面自由框选。</p></div>
+        <div class="smart-card"><span class="sc-num">03</span><h4>本地 OCR 与剪贴板</h4><p>图片不上传云端，识别结果直接复制到微信、邮件和文档。</p></div>
         <div class="smart-card"><span class="sc-num">04</span><h4>录屏先确认再保存</h4><p>停止录制后确认界面，不会把测试录屏自动塞进目录。</p></div>
         <div class="smart-card"><span class="sc-num">05</span><h4>贴图状态持久化</h4><p>贴图位置和图片自动保存，重启应用后自动恢复。</p></div>
         <div class="smart-card"><span class="sc-num">06</span><h4>键盘钩子兜底</h4><p>全局热键注册失败时自动启用键盘钩子，确保快捷键始终可用。</p></div>
@@ -263,9 +299,9 @@
         <div class="dl-left">
           <span class="sec-tag">免费下载</span>
           <h2>双击安装，即刻使用</h2>
-          <p>安装后自动创建桌面快捷方式，打开 SnipEasy 就能用 F1/F2。免费、无广告、无捆绑。</p>
-          <div class="dl-meta"><span><b>系统</b> Windows 10/11</span><span><b>大小</b> 约 28 MB</span><span><b>版本</b> 0.2.0</span></div>
-          <a class="btn btn-primary btn-glow btn-lg" href="downloads/SnipEasy-Setup.dat" download="SnipEasy-Setup.exe">
+          <p>安装后自动创建桌面快捷方式，打开 SnipEasy 即可使用。需要 .NET 9 Desktop Runtime；OCR 能力取决于 Windows 已安装的语言包。</p>
+          <div class="dl-meta"><span><b>系统</b> Windows 10/11</span><span><b>大小</b> 约 33 MB</span><span><b>版本</b> 0.3.0</span></div>
+          <a class="btn btn-primary btn-glow btn-lg" href="downloads/SnipEasy-Setup.exe" download="SnipEasy-Setup.exe">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             下载 SnipEasy-Setup.exe
           </a>
@@ -285,7 +321,7 @@
     /* 2. Cycling hero text */
 
     /* 2. Cycling hero text */
-    (function(){const el=document.getElementById('cyclingText');if(!el)return;const phrases=['一次到位','随心标注','高效录制','精准取色','灵活配置'];let i=0;function cycle(){el.style.opacity='0';el.style.transform='translateY(8px)';setTimeout(()=>{i=(i+1)%phrases.length;el.textContent=phrases[i];el.style.opacity='1';el.style.transform='translateY(0)'},400)}el.style.transition='opacity .4s,transform .4s';setInterval(cycle,3000)})();
+    (function(){const el=document.getElementById('cyclingText');if(!el)return;const phrases=['一次到位','智能选窗','本地识字','高效录制','隐私优先'];let i=0;function cycle(){el.style.opacity='0';el.style.transform='translateY(8px)';setTimeout(()=>{i=(i+1)%phrases.length;el.textContent=phrases[i];el.style.opacity='1';el.style.transform='translateY(0)'},400)}el.style.transition='opacity .4s,transform .4s';setInterval(cycle,3000)})();
 
     /* 3. Mockup annotation cycle */
     (function(){const btns=document.querySelectorAll('.mt');const anns=[document.getElementById('annRect'),document.getElementById('annCircle'),document.getElementById('annText'),document.getElementById('annArrow')];if(!anns[0])return;let step=0;function show(){anns.forEach(a=>{a.style.opacity='0';a.style.transform='scale(0.7)'});btns.forEach(b=>b.classList.remove('active'));const names=['rect','circle','text','arrow'];btns.forEach(b=>{if(b.dataset.tool===names[step])b.classList.add('active')});setTimeout(()=>{anns[step].style.opacity='1';anns[step].style.transform='scale(1)'},150);step=(step+1)%4}show();setInterval(show,2800)})();
@@ -315,7 +351,7 @@
     document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'})}})});
 
     /* 11. Cursor glow */
-    (function(){const g=document.getElementById('cursorGlow');if(!g)return;let mx=-500,my=-500,gx=-500,gy=-500;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;g.style.opacity='1'});document.addEventListener('mouseleave',()=>{g.style.opacity='0'});(function loop(){gx+=(mx-gx)*.06;gy+=(my-gy)*.06;g.style.left=gx+'px';g.style.top=gy+'px';requestAnimationFrame(loop)()})})();
+    (function(){const g=document.getElementById('cursorGlow');if(!g)return;let mx=-500,my=-500,gx=-500,gy=-500;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;g.style.opacity='1'});document.addEventListener('mouseleave',()=>{g.style.opacity='0'});(function loop(){gx+=(mx-gx)*.06;gy+=(my-gy)*.06;g.style.left=gx+'px';g.style.top=gy+'px';requestAnimationFrame(loop)})})();
 
     /* 12. Card tilt */
     document.querySelectorAll('.feat-card,.rec-card,.cfg-card').forEach(c=>{c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5;const y=(e.clientY-r.top)/r.height-.5;c.style.transform=`translateY(-6px) perspective(600px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`});c.addEventListener('mouseleave',()=>{c.style.transform=''})});

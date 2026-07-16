@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using SnipEasy.App.Services;
 
 namespace SnipEasy.App.Tests;
@@ -25,6 +26,11 @@ public class CrashReportServiceTests : IDisposable
         // Assert
         Assert.True(File.Exists(package));
         Assert.EndsWith(".zip", package);
+        using var archive = ZipFile.OpenRead(package);
+        Assert.DoesNotContain(archive.Entries, entry =>
+            string.Equals(entry.FullName, "settings.json", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(archive.Entries, entry =>
+            string.Equals(entry.FullName, "history.json", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

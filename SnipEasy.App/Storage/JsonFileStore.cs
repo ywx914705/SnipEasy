@@ -14,6 +14,7 @@ public sealed class JsonFileStore<T> where T : class
 
     private readonly string _path;
     private readonly AppLogger? _logger;
+    private readonly object _gate = new();
 
     public JsonFileStore(string path, AppLogger? logger = null)
     {
@@ -23,38 +24,74 @@ public sealed class JsonFileStore<T> where T : class
 
     public T LoadOrDefault(Func<T> createDefault)
     {
-        if (!File.Exists(_path))
+        lock (_gate)
         {
-            return createDefault();
-        }
+            if (!File.Exists(_path))
+            {
+                return createDefault();
+            }
 
-        try
-        {
-            var json = File.ReadAllText(_path);
-            return JsonSerializer.Deserialize<T>(json, SerializerOptions) ?? createDefault();
-        }
-        catch (Exception ex)
-        {
-            var backupPath = BackupBrokenFile();
-            _logger?.Warn(string.IsNullOrWhiteSpace(backupPath)
-                ? $"Unable to load JSON store {_path}; defaults will be used. {ex.Message}"
-                : $"Unable to load JSON store {_path}; backed up to {backupPath}. {ex.Message}");
-            return createDefault();
+            try
+            {
+                var json = File.ReadAllText(_path);
+                return JsonSerializer.Deserialize<T>(json, SerializerOptions) ?? createDefault();
+            }
+            catch (Exception ex)
+            {
+                var backupPath = BackupBrokenFile();
+                _logger?.Warn(string.IsNullOrWhiteSpace(backupPath)
+                    ? $"Unable to load JSON store {_path}; defaults will be used. {ex.Message}"
+                    : $"Unable to load JSON store {_path}; backed up to {backupPath}. {ex.Message}");
+                return createDefault();
+            }
         }
     }
 
     public void Save(T value)
     {
-        var directory = Path.GetDirectoryName(_path);
-        if (!string.IsNullOrWhiteSpace(directory))
+        lock (_gate)
         {
-            Directory.CreateDirectory(directory);
-        }
+            var directory = Path.GetDirectoryName(_path);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-        var temporaryPath = $"{_path}.tmp";
-        File.WriteAllText(temporaryPath, JsonSerializer.Serialize(value, SerializerOptions));
-        File.Copy(temporaryPath, _path, overwrite: true);
-        File.Delete(temporaryPath);
+            var temporaryPath = $"{_path}.tmp";
+            var backupPath = $"{_path}.bak";
+            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(value, SerializerOptions));
+
+            try
+            {
+                if (File.Exists(_path))
+                {
+                    File.Replace(temporaryPath, _path, backupPath, ignoreMetadataErrors: true);
+                    try
+                    {
+                        File.Delete(backupPath);
+                    }
+                    catch (IOException)
+                    {
+                        _logger?.Warn($"Unable to delete JSON backup {backupPath}.");
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        _logger?.Warn($"Unable to delete JSON backup {backupPath}.");
+                    }
+                }
+                else
+                {
+                    File.Move(temporaryPath, _path);
+                }
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
+            }
+        }
     }
 
     private string BackupBrokenFile()

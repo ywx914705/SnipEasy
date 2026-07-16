@@ -3,7 +3,7 @@
 ; Build script passes /DSourceDir=<path> to point at the staged app files.
 
 #ifndef SourceDir
-  #define SourceDir "..\SnipEasy.App\bin\Release\net9.0-windows"
+  #define SourceDir "..\SnipEasy.App\bin\Release\net9.0-windows10.0.19041.0"
 #endif
 
 #ifndef AppIcon

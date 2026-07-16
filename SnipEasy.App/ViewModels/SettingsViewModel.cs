@@ -55,12 +55,16 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedHistoryRetentionIndex = 1;
 
-    public SettingsViewModel(AppPaths paths, AppLogger logger, AppSettingsService settingsService)
+    public SettingsViewModel(
+        AppPaths paths,
+        AppLogger logger,
+        AppSettingsService settingsService,
+        AppSettings settings)
     {
         _paths = paths;
         _logger = logger;
         _settingsService = settingsService;
-        _settings = _settingsService.Load();
+        _settings = settings;
         UpdateAllHints();
     }
 
@@ -82,7 +86,7 @@ public partial class SettingsViewModel : ObservableObject
     /// <summary>
     /// Gets the available history retention day options.
     /// </summary>
-    public int[] HistoryRetentionDays { get; } = [30, 90, 180, 365];
+    public int[] HistoryRetentionDays { get; } = [30, 90, 180, 365, 0];
 
     /// <summary>
     /// Gets whether the startup service is enabled.
@@ -157,7 +161,7 @@ public partial class SettingsViewModel : ObservableObject
         _settings.RecordingFrameRate = 12;
         _settings.RecordingCrf = 23;
         _settings.PreferFfmpegRecording = true;
-        _settings.AllowLocalAviFallback = true;
+        _settings.AllowLocalAviFallback = false;
         _settings.FfmpegPath = string.Empty;
         _settings.RecordingCaptureSystemAudio = false;
         _settings.RecordingSystemAudioDevice = "virtual-audio-capturer";
@@ -165,6 +169,7 @@ public partial class SettingsViewModel : ObservableObject
         _settings.RecordingMicrophoneDevice = string.Empty;
         _settings.HistoryRetentionDays = 90;
         _settings.MinimizeToTrayOnClose = true;
+        _settings.CaptureDelaySeconds = 0;
 
         _settingsService.Save(_settings);
         LoadFromSettings();
@@ -320,9 +325,11 @@ public partial class SettingsViewModel : ObservableObject
     {
         return days switch
         {
+            <= 0 => 4,
             <= 30 => 0,
             <= 90 => 1,
             <= 180 => 2,
+            <= 365 => 3,
             _ => 3
         };
     }
@@ -335,6 +342,7 @@ public partial class SettingsViewModel : ObservableObject
             1 => 90,
             2 => 180,
             3 => 365,
+            4 => 0,
             _ => 90
         };
     }
