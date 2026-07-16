@@ -462,6 +462,7 @@ public partial class MainWindow : Window
         _logger.Info("Region screenshot workflow started.");
         RefreshStatus("正在进入截图模式，请框选区域后直接批注、复制或保存。");
         var restoreMainWindow = IsVisible;
+        var copiedToClipboard = false;
 
         try
         {
@@ -505,6 +506,7 @@ public partial class MainWindow : Window
             if (selector.RequestedAction == RegionCaptureWindow.CaptureAction.CopyToClipboard)
             {
                 _clipboardService.SetImage(image);
+                copiedToClipboard = true;
                 statusText = "截图已复制到剪贴板。";
                 tipText = "图片已复制，可直接粘贴。";
             }
@@ -570,11 +572,20 @@ public partial class MainWindow : Window
         {
             CaptureButton.IsEnabled = true;
             _captureBusy = false;
-            if (restoreMainWindow && IsLoaded && !IsVisible)
+            if (ShouldRestoreMainWindowAfterCapture(restoreMainWindow, copiedToClipboard) &&
+                IsLoaded &&
+                !IsVisible)
             {
                 ShowAndActivate();
             }
         }
+    }
+
+    internal static bool ShouldRestoreMainWindowAfterCapture(
+        bool wasVisibleBeforeCapture,
+        bool copiedToClipboard)
+    {
+        return wasVisibleBeforeCapture && !copiedToClipboard;
     }
 
     /// <summary>
